@@ -1,5 +1,6 @@
 import git
 
+
 def quickPush():
     # 移动到当前目录
     import os
@@ -16,4 +17,6 @@ def quickPush():
     origin = repo.remote(name='origin')
     origin.push('master')
 
-quickPush()
+
+if __name__ == "__main__":
+    quickPush()
