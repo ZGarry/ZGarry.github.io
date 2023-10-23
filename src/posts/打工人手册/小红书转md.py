@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 
 def getAllArticle():
     # 获取个人的所有链接
-    browser = webdriver.Chrome()
+    browser = webdriver.Chrome(r"C:\temp\soft")
     browser.get(
         'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4')
 
