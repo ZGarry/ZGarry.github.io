@@ -4,7 +4,7 @@ layout: BlogHome
 icon: home
 title: Home
 heroText: 入川为王
-tagline: 我们的生活，存在着巨大的优化空间。
+tagline: 我们的生活，存在着巨大的优化空间!
 heroFullScreen: true
 projects:
   - icon: project
