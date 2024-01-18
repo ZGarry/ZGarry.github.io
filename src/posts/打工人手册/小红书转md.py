@@ -5,58 +5,49 @@ from selenium.webdriver.chrome.options import Options
 
 
 def getAllArticle():
-    # chrome_path = r"C:\temp\soft"
-    # chrome_options = Options()
+    chrome_path = r"C:\temp\soft"
+    chrome_options = Options()
 
-    # browser = webdriver.Chrome(chrome_options)
-    # browser.get(
-    #     'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4')
+    browser = webdriver.Chrome(chrome_options)
+    browser.get(
+        'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4')
 
-    # # 定义一个集合用来存储链接
-    # # 未登录，只能看到过去30篇笔记
-    # links_set = set()
+    # 定义一个集合用来存储链接
+    # 未登录，只能看到过去30篇笔记
+    links_set = set()
 
-    # # 找到 id 为 "userPostedFeeds" 的元素
-    # user_posted_feeds = browser.find_element(By.ID, "userPostedFeeds")
+    # 找到 id 为 "userPostedFeeds" 的元素
+    user_posted_feeds = browser.find_element(By.ID, "userPostedFeeds")
 
-    # # 滚动到页面底部，并获取链接
-    # for i in range(10):
-    #     # 找到所有以 "/explore" 开头的链接
-    #     links = user_posted_feeds.find_elements(
-    #         By.CSS_SELECTOR, "a[href^='/explore']")
+    # 滚动到页面底部，并获取链接
+    for i in range(10):
+        # 找到所有以 "/explore" 开头的链接
+        links = user_posted_feeds.find_elements(
+            By.CSS_SELECTOR, "a[href^='/explore']")
 
-    #     # 将链接添加到集合中
-    #     for link in links:
-    #         links_set.add(link.get_attribute("href"))
+        # 将链接添加到集合中
+        for link in links:
+            links_set.add(link.get_attribute("href"))
 
-    #     # 执行滚动操作
-    #     browser.execute_script(
-    #         "window.scrollTo(0, document.body.scrollHeight);")
+        # 执行滚动操作
+        browser.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
 
-    #     # 等待页面加载完成
-    #     browser.implicitly_wait(10)
+        # 等待页面加载完成
+        browser.implicitly_wait(10)
 
-    #     # 如果已经滚动到了页面底部，退出循环
-    #     if browser.execute_script("return window.pageYOffset + window.innerHeight >= document.body.scrollHeight;"):
-    #         break
+        # 如果已经滚动到了页面底部，退出循环
+        if browser.execute_script("return window.pageYOffset + window.innerHeight >= document.body.scrollHeight;"):
+            break
 
-    #     # 重新获取 id 为 "userPostedFeeds" 的元素
-    #     user_posted_feeds = browser.find_element(By.ID, "userPostedFeeds")
+        # 重新获取 id 为 "userPostedFeeds" 的元素
+        user_posted_feeds = browser.find_element(By.ID, "userPostedFeeds")
 
-    # # 输出去重后的链接
-    # for link in links_set:
-    #     print(link)
+    # 输出去重后的链接
+    for link in links_set:
+        print(link)
 
-    links = [
-        'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4/6531057d000000001f007f93',
-        'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4/652d1aec000000001e00d540',
-        'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4/652b48b7000000001f03bed6',
-        'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4/6528b05e0000000020003ada',
-        'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4/652622df000000001e02d40a',
-        "https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4/6524a95b000000001e03c212"
-    ]
-
-    return links
+    return list(links_set)
 
 
 def downForArticle(url):
@@ -135,6 +126,7 @@ os.chdir(current_directory)
 print("当前工作目录:", os.getcwd())
 
 
-li = getAllArticle()
+# li = getAllArticle()
+li = []
 for i in list(li):
     downForArticle(i)
