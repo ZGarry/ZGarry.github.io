@@ -1,3 +1,5 @@
+npm run docs:build
+
 REM 推送至腾讯云（后续可将此也转入到github上）
 @echo off
 

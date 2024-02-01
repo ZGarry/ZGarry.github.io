@@ -3,7 +3,7 @@ import theme from "./theme.js";
 
 export default defineUserConfig({
   // 此内容无需更新到远程
-  base: "/dist/",
+  base: "/",
 
   lang: "en-US",
   title: "入川为王",
