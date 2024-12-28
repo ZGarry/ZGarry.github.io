@@ -5,25 +5,24 @@ from selenium.webdriver.chrome.options import Options
 
 
 def getAllArticle():
-    chrome_path = r"C:\temp\soft"
-    chrome_options = Options()
+    # chrome_options = Options()
+    # chrome_options
 
-    browser = webdriver.Chrome(chrome_options)
     browser.get(
         'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4')
 
-    # 定义一个集合用来存储链接
-    # 未登录，只能看到过去30篇笔记
+# 定义一个集合用来存储链接
+# 未登录，只能看到过去30篇笔记
     links_set = set()
 
     # 找到 id 为 "userPostedFeeds" 的元素
     user_posted_feeds = browser.find_element(By.ID, "userPostedFeeds")
 
     # 滚动到页面底部，并获取链接
-    for i in range(10):
+    for i in range(40):
         # 找到所有以 "/explore" 开头的链接
         links = user_posted_feeds.find_elements(
-            By.CSS_SELECTOR, "a[href^='/explore']")
+            By.CSS_SELECTOR, "a[href^='/user/profile']")
 
         # 将链接添加到集合中
         for link in links:
@@ -43,11 +42,12 @@ def getAllArticle():
         # 重新获取 id 为 "userPostedFeeds" 的元素
         user_posted_feeds = browser.find_element(By.ID, "userPostedFeeds")
 
+    # https://www.xiaohongshu.com/explore/652b48b7000000001f03bed6?xsec_token=ABmeeILZLA2Kz4cDESXC3P9reVGrRWwE1cDWzrkuQmb-M=&xsec_source=pc_user
     # 输出去重后的链接
     for link in links_set:
         print(link)
 
-    return list(links_set)
+    return links_set
 
 
 def downForArticle(url):
@@ -126,7 +126,7 @@ os.chdir(current_directory)
 print("当前工作目录:", os.getcwd())
 
 
-# li = getAllArticle()
+li = getAllArticle()
 li = []
 for i in list(li):
     downForArticle(i)
