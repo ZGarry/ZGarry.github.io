@@ -2,14 +2,33 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+# 获取当前文件的路径
+current_file = os.path.abspath(__file__)
+
+# 获取当前文件所在的目录
+current_directory = os.path.dirname(current_file)
+
+# 设置当前工作目录
+os.chdir(current_directory)
+
+# 打印当前工作目录
+print("当前工作目录:", os.getcwd())
+
+chrome_options = Options()
+chrome_options.add_argument("--user-data-dir=D:\my")
+browser = webdriver.Chrome(chrome_options)
 
 
 def getAllArticle():
-    # chrome_options = Options()
-    # chrome_options
 
+    # option.binary_location = r"C:\Program Files\Google\Chrome\Application/google.exe"  # binary_location属性指定Chrome启动文件
+    # browser = webdriver.Chrome(option)
     browser.get(
         'https://www.xiaohongshu.com/user/profile/60460e150000000001001ed4')
+
+    # 人工进行登录
 
 # 定义一个集合用来存储链接
 # 未登录，只能看到过去30篇笔记
@@ -18,15 +37,21 @@ def getAllArticle():
     # 找到 id 为 "userPostedFeeds" 的元素
     user_posted_feeds = browser.find_element(By.ID, "userPostedFeeds")
 
+ # 等待页面加载完成
+    browser.implicitly_wait(100)
+
     # 滚动到页面底部，并获取链接
     for i in range(40):
         # 找到所有以 "/explore" 开头的链接
-        links = user_posted_feeds.find_elements(
-            By.CSS_SELECTOR, "a[href^='/user/profile']")
+        wait = WebDriverWait(browser, 10)
+        links = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a[href^='/user/profile']")))
 
         # 将链接添加到集合中
         for link in links:
-            links_set.add(link.get_attribute("href"))
+            try:
+                links_set.add(link.get_attribute("href"))
+            except:
+                pass
 
         # 执行滚动操作
         browser.execute_script(
@@ -52,7 +77,6 @@ def getAllArticle():
 
 def downForArticle(url):
     # 创建Chrome浏览器对象
-    browser = webdriver.Chrome()
     # 加载指定的页面
     # 打开页面
     browser.get(url)
@@ -72,13 +96,14 @@ def downForArticle(url):
     from io import BytesIO
 
     # 找到 class 为 "note-content" 的元素
-    pics = browser.find_elements(By.CSS_SELECTOR, '.swiper-wrapper')[0]
-
-    text = pics.get_attribute("innerHTML")
+    # 使用 CSS 选择器查找所有包含 'xhscdn' 的 img 元素
+    images = browser.find_elements(By.CSS_SELECTOR, "img[src*='sns-webpic-qc.xhscdn.com']")
 
     # 使用正则表达式提取内容
-    import re
-    result = re.findall(r'url\(&quot;(.*?)&quot;\)', text)
+    # 打印每个图片的 src 属性
+    result = []
+    for img in images:
+        result.append(img.get_attribute("src"))
 
     # 输出提取的内容
     s = ""
@@ -113,20 +138,10 @@ def downForArticle(url):
         f.write(markdown)
 
 
-# 获取当前文件的路径
-current_file = os.path.abspath(__file__)
-
-# 获取当前文件所在的目录
-current_directory = os.path.dirname(current_file)
-
-# 设置当前工作目录
-os.chdir(current_directory)
-
-# 打印当前工作目录
-print("当前工作目录:", os.getcwd())
-
-
 li = getAllArticle()
-li = []
+# pass
 for i in list(li):
-    downForArticle(i)
+    try:
+        downForArticle(i)
+    except:
+        pass
