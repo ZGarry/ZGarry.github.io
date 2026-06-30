@@ -1,0 +1,17 @@
+body {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  margin: 0;
+  background: #0e1514;
+  color: #e8fff9;
+  font-family: system-ui, "Microsoft YaHei", sans-serif;
+}
+
+main {
+  width: min(540px, 88vw);
+  border: 1px solid rgba(54, 209, 191, 0.45);
+  border-radius: 8px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.08);
+}
