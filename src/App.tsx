@@ -296,6 +296,7 @@ function DemoCard({
       type="button"
       className={`demo-card accent-${demo.accent} ${selected ? "selected" : ""}`}
       onClick={onSelect}
+      aria-pressed={selected}
     >
       <span className="demo-card__glance" aria-hidden="true">
         <span />
@@ -600,10 +601,10 @@ export default function App() {
           <WorkerStatus state={workerState} />
           <a
             className="github-link"
-            href="https://github.com/"
+            href="https://github.com/ZGarry/ZGarry.github.io/tree/codex/ai-demo-showcase-source"
             target="_blank"
             rel="noreferrer"
-            aria-label="打开 GitHub"
+            aria-label="打开 GitHub 源码"
             title="GitHub"
           >
             <Github size={18} />
@@ -616,7 +617,10 @@ export default function App() {
           <div className="section-heading">
             <div>
               <p>Demo Library</p>
-              <h1>能跑的 HTML，统一展示</h1>
+              <h1 aria-label="能跑的 HTML，统一展示">
+                <span aria-hidden="true">能跑的 HTML，</span>
+                <span aria-hidden="true">统一展示</span>
+              </h1>
             </div>
             <span className="count-pill">
               <LayoutGrid size={15} />
