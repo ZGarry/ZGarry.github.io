@@ -297,6 +297,7 @@ function DemoCard({
       className={`demo-card accent-${demo.accent} ${selected ? "selected" : ""}`}
       onClick={onSelect}
       aria-pressed={selected}
+      aria-label={`${demo.title}，${demo.sourceLabel}，${demo.kind === "folder" ? "文件夹 Demo" : "HTML Demo"}`}
     >
       <span className="demo-card__glance" aria-hidden="true">
         <span />
@@ -326,7 +327,7 @@ function WorkerStatus({ state }: { state: ServiceWorkerState }) {
   }[state];
 
   return (
-    <span className={`worker-status ${state}`}>
+    <span className={`worker-status ${state}`} role="status" aria-live="polite">
       <ShieldCheck size={16} />
       {message}
     </span>
@@ -586,6 +587,9 @@ export default function App() {
 
   return (
     <main className="app-shell">
+      <a className="skip-link" href="#preview-stage">
+        跳到预览
+      </a>
       <header className="topbar">
         <a className="brand" href="./" aria-label="AI Demo 展示站首页">
           <span className="brand__mark">
@@ -645,6 +649,8 @@ export default function App() {
 
           <div
             className={`upload-zone ${isDragging ? "dragging" : ""}`}
+            role="region"
+            aria-label="上传 Demo"
             onDragOver={(event) => {
               event.preventDefault();
               setIsDragging(true);
@@ -657,7 +663,7 @@ export default function App() {
             </div>
             <div className="upload-zone__copy">
               <strong>上传一个 Demo</strong>
-              <span>{uploadMessage}</span>
+              <span aria-live="polite">{uploadMessage}</span>
             </div>
             <div className="upload-zone__actions">
               <ActionButton
@@ -682,6 +688,7 @@ export default function App() {
             className="visually-hidden"
             type="file"
             accept=".html,.htm,.xhtml,text/html"
+            aria-label="上传单个 HTML Demo"
             onChange={onSingleFileChange}
           />
           <input
@@ -689,6 +696,7 @@ export default function App() {
             className="visually-hidden"
             type="file"
             multiple
+            aria-label="上传文件夹 Demo"
             onChange={onFolderChange}
           />
 
@@ -698,6 +706,7 @@ export default function App() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                aria-label="搜索 Demo"
                 placeholder="搜索标题、标签、描述"
               />
             </label>
@@ -710,6 +719,7 @@ export default function App() {
                 type="button"
                 className={tag === activeTag ? "active" : ""}
                 onClick={() => setActiveTag(tag)}
+                aria-pressed={tag === activeTag}
               >
                 {tag}
               </button>
@@ -731,7 +741,12 @@ export default function App() {
           </div>
         </aside>
 
-        <section className="preview-panel" aria-label="Demo 预览">
+        <section
+          id="preview-stage"
+          className="preview-panel"
+          aria-label="Demo 预览"
+          aria-busy={isBusy}
+        >
           {selectedDemo ? (
             <>
               <div className={`preview-hero accent-${selectedDemo.accent}`}>
