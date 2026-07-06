@@ -2,40 +2,11 @@
 home: true
 layout: BlogHome
 icon: home
-title: Home
+title: 首页
 heroText: 入川为王
-tagline: 我们的生活，存在着巨大的优化空间!
-heroFullScreen: true
-projects:
-  - icon: project
-    name: project name
-    desc: project detailed description
-    link: https://your.project.link
-
-  - icon: link
-    name: link name
-    desc: link detailed description
-    link: https://link.address
-
-  - icon: book
-    name: book name
-    desc: Detailed description of the book
-    link: https://link.to.your.book
-
-  - icon: article
-    name: article name
-    desc: Detailed description of the article
-    link: https://link.to.your.article
-
-  - icon: friend
-    name: friend name
-    desc: Detailed description of friend
-    link: https://link.to.your.friend
-
-  - icon: /logo.svg
-    name: custom item
-    desc: Detailed description of this custom item
-    link: https://link.to.your.friend
-
+tagline: 我们的生活，存在着巨大的优化空间。
+heroFullScreen: false
 footer: 我们的生活，存在着巨大的优化空间。
 ---
+
+这里记录一些长期问题、阶段复盘、职场观察和 AI 工具实践。少一点目录噪音，多留给真正值得回看的文章。

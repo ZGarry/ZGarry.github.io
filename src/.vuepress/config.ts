@@ -2,15 +2,13 @@ import { defineUserConfig } from "vuepress";
 import theme from "./theme.js";
 
 export default defineUserConfig({
-  // 此内容无需更新到远程
   base: "/",
 
-  lang: "en-US",
+  lang: "zh-CN",
   title: "入川为王",
-  description: "A blog demo for vuepress-theme-hope",
+  description: "入川为王的个人博客，记录长期思考、职场观察和生活复盘。",
 
   theme,
 
-  // Enable it with pwa
-  // shouldPrefetch: false,
+  shouldPrefetch: false,
 });
