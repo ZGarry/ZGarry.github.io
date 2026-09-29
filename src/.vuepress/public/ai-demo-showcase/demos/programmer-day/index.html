@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>程序员的一天</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#181425;color:#ead4aa;overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",system-ui,sans-serif;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#app{display:flex;flex-direction:column;height:100%;height:100dvh}
+#stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:pointer;background:#181425}
+#ov{position:absolute;pointer-events:none;overflow:hidden}
+.bb{position:absolute;transform:translate(-50%,-100%);background:#fff;color:#181425;border:2px solid #181425;
+  padding:.15em .45em;white-space:nowrap;font-size:var(--fs);line-height:1.25;box-shadow:2px 2px 0 #181425;font-weight:bold}
+.bb::after{content:"";position:absolute;left:50%;bottom:-.45em;width:.35em;height:.35em;background:#fff;border:2px solid #181425;border-top:none;border-left:none;transform:translateX(-50%)}
+.bb.think{border-style:dashed;color:#3a4466}
+.bb.shout{background:#fee761}
+.bb.shout::after{background:#fee761}
+.bb.ai{background:#2ce8f5}
+.bb.ai::after{background:#2ce8f5}
+.card{position:absolute;left:2%;top:9%;background:#181425;color:#fee761;border:2px solid #ead4aa;padding:.2em .6em;
+  font-size:var(--fs);white-space:nowrap;font-weight:bold;box-shadow:3px 3px 0 #0008}
+.card small{color:#c0cbdc;font-weight:normal;margin-left:.5em}
+#hint{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:#181425cc;border:2px solid #ead4aa;
+  padding:4px 10px;font-size:13px;pointer-events:none;white-space:nowrap;animation:blink 1.2s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+#bar{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#262b44;border-top:2px solid #3a4466}
+button{font:inherit;font-size:13px;color:#ead4aa;background:#3a4466;border:2px solid #181425;padding:3px 8px;cursor:pointer;
+  box-shadow:inset -2px -2px 0 #262b44,inset 2px 2px 0 #5a6988;white-space:nowrap;min-height:28px}
+button:active{box-shadow:inset 2px 2px 0 #262b44}
+button.on{background:#feae34;color:#181425;box-shadow:inset -2px -2px 0 #be4a2f,inset 2px 2px 0 #fee761}
+#speed{display:flex;gap:2px}
+#tl{position:relative;flex:1;height:22px;background:#181425;border:2px solid #5a6988;cursor:pointer;touch-action:none;min-width:80px}
+#tlfill{position:absolute;left:0;top:0;bottom:0;background:#124e89;pointer-events:none}
+#tlmarks{position:absolute;inset:0;pointer-events:none}
+#tlmarks i{position:absolute;top:0;bottom:0;width:2px;background:#5a6988}
+#tlknob{position:absolute;top:-4px;width:8px;height:26px;margin-left:-4px;background:#fee761;border:2px solid #181425;pointer-events:none}
+#time{font-family:Consolas,"Courier New",monospace;font-size:14px;min-width:3.2em;text-align:center;color:#fee761}
+#chaps{display:flex;flex-wrap:wrap;gap:4px;padding:6px 10px 8px;background:#262b44;overflow-x:auto;scrollbar-width:thin}
+#chaps button{font-size:12px;flex:none}
+#chaps button b{color:#8b9bb4;font-weight:normal;margin-right:4px;font-family:Consolas,monospace}
+#chaps button.on b{color:#733e39}
+@media (max-width:560px){#chaps{flex-wrap:nowrap}#bar{gap:5px;padding:5px 6px}button{padding:2px 6px;font-size:12px}#time{font-size:12px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="c" width="320" height="180"></canvas>
+    <div id="ov"></div>
+    <div id="hint">点击画面开启声音 ♪</div>
+  </div>
+  <div id="bar">
+    <button id="play" title="空格">❚❚</button>
+    <div id="speed"><button data-s="1" class="on">1×</button><button data-s="2">2×</button><button data-s="3">3×</button></div>
+    <div id="tl"><div id="tlfill"></div><div id="tlmarks"></div><div id="tlknob"></div></div>
+    <span id="time">07:00</span>
+    <button id="mute" title="M">♪ 关</button>
+  </div>
+  <div id="chaps"></div>
+</div>
+<script>
+'use strict';
+/* ================= 基础：画布 / 调色板 / 工具 ================= */
+const W = 320, H = 180;
+const cv = document.getElementById('c');
+const g = cv.getContext('2d', { alpha: false });
+g.imageSmoothingEnabled = false;
+
+// 统一 32 色调色板（ENDESGA 32）——全片所有像素只来自这里
+const P = {
+  ink:'#181425', night:'#262b44', navy:'#3a4466', slate:'#5a6988', gray:'#8b9bb4', light:'#c0cbdc', white:'#ffffff',
+  deep:'#124e89', blue:'#0099db', cyan:'#2ce8f5', teal:'#193c3e', dgreen:'#265c42', green:'#3e8948', lime:'#63c74d',
+  yellow:'#fee761', gold:'#feae34', orange:'#f77622', rust:'#be4a2f', tan:'#d77643', sand:'#ead4aa', skin:'#e4a672',
+  brown:'#b86f50', dbrown:'#733e39', wine:'#3e2731', dred:'#a22633', red:'#e43b44', hot:'#ff0044', purple:'#68386c',
+  pink:'#b55088', salmon:'#f6757a', peach:'#e8b796', clay:'#c28569'
+};
+
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, f) => a + (b - a) * f;
+const ease = f => f * f * (3 - 2 * f);
+const fr = (v) => v - Math.floor(v);
+function hash(n) { n = Math.sin(n * 127.1 + 311.7) * 43758.5453; return n - Math.floor(n); }
+function R(x, y, w, h, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+function px(x, y, c) { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), 1, 1); }
+// 1 像素的线（Bresenham）
+function line(x0, y0, x1, y1, c) {
+  x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+  g.fillStyle = c;
+  let dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1, e = dx + dy, n = 0;
+  while (n++ < 400) { g.fillRect(x0, y0, 1, 1); if (x0 === x1 && y0 === y1) break; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx; } if (e2 <= dx) { e += dx; y0 += sy; } }
+}
+function circ(cx, cy, r, c) { // 实心像素圆
+  g.fillStyle = c;
+  for (let y = -r; y <= r; y++) { const w = Math.floor(Math.sqrt(r * r - y * y + r * .8)); g.fillRect(Math.round(cx - w), Math.round(cy + y), w * 2 + 1, 1); }
+}
+
+// 有序抖动（4×4 Bayer）：用调色板颜色做"半透明"，保证不产生调色板外的颜色
+const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const patCache = new Map();
+function ditherPat(c, lvl) {
+  const k = c + lvl; let p = patCache.get(k);
+  if (!p) {
+    const o = document.createElement('canvas'); o.width = o.height = 4;
+    const x = o.getContext('2d'); x.fillStyle = c;
+    for (let i = 0; i < 16; i++) if (BAYER[i] < lvl) x.fillRect(i & 3, i >> 2, 1, 1);
+    p = g.createPattern(o, 'repeat'); patCache.set(k, p);
+  }
+  return p;
+}
+// lvl: 0..16（16 = 实心）
+function dith(x, y, w, h, c, lvl) {
+  lvl = Math.round(clamp(lvl, 0, 16)); if (lvl <= 0) return;
+  if (lvl >= 16) return R(x, y, w, h, c);
+  g.fillStyle = ditherPat(c, lvl); g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+}
+
+/* ================= 3×5 像素字体（每行一个八进制数：4=左 2=中 1=右） ================= */
+const FONT = {
+  '0':'75557','1':'26227','2':'71747','3':'71317','4':'55711','5':'74717','6':'74757','7':'71122','8':'75757','9':'75717',
+  A:'25755',B:'65656',C:'34443',D:'65556',E:'74647',F:'74644',G:'34553',H:'55755',I:'72227',J:'11152',K:'55655',L:'44447',M:'57755',
+  N:'65555',O:'25552',P:'65644',Q:'25563',R:'65655',S:'34216',T:'72222',U:'55557',V:'55552',W:'55775',X:'55255',Y:'55222',Z:'71247',
+  a:'03553',b:'46556',c:'03443',d:'13553',e:'02743',f:'12722',g:'35316',h:'46555',i:'20222',j:'10152',k:'45665',l:'62227',m:'06755',
+  n:'06555',o:'02552',p:'06564',q:'03531',r:'05644',s:'03616',t:'27221',u:'05553',v:'05552',w:'05577',x:'05225',y:'05531',z:'07247',
+  ' ':'00000','.':'00002',',':'00024',':':'02020',';':'02024','=':'07070','+':'02720','-':'00700','*':'05250','/':'11244',
+  '(':'24442',')':'42224','{':'32623','}':'62326','[':'64446',']':'32223','<':'12421','>':'42124','!':'22202','?':'71202',
+  "'":'22000','"':'55000','_':'00007','&':'25253','|':'22222','#':'57575','%':'51245','$':'36236','~':'03600','`':'42000','^':'25000','\\':'44211'
+};
+const GLYPH = {};
+for (const k in FONT) GLYPH[k] = FONT[k].split('').map(Number);
+function text(s, x, y, c) {
+  g.fillStyle = c; x = Math.round(x); y = Math.round(y);
+  for (let i = 0; i < s.length; i++) {
+    const gl = GLYPH[s[i]];
+    if (gl) for (let r = 0; r < 5; r++) { const b = gl[r]; if (!b) continue;
+      if (b & 4) g.fillRect(x, y + r, 1, 1); if (b & 2) g.fillRect(x + 1, y + r, 1, 1); if (b & 1) g.fillRect(x + 2, y + r, 1, 1); }
+    x += 4;
+  }
+}
+const textW = s => s.length * 4 - 1;
+function textC(s, cx, y, c) { text(s, cx - textW(s) / 2, y, c); }
+
+/* ================= 时间轴 ================= */
+// 每章：时长（秒）、游戏内时钟起止（分钟）
+const CH = [
+  { id:'alarm',   name:'闹钟',     dur:12, c0:420,  c1:447 },
+  { id:'commute', name:'通勤',     dur:10, c0:510,  c1:548 },
+  { id:'arrive',  name:'到工位',   dur:14, c0:570,  c1:615 },
+  { id:'flow',    name:'心流',     dur:12, c0:630,  c1:715 },
+  { id:'lunch',   name:'午饭',     dur:8,  c0:720,  c1:765 },
+  { id:'alert',   name:'线上告警', dur:12, c0:840,  c1:920 },
+  { id:'ai',      name:'AI 搭档',  dur:16, c0:930,  c1:1010 },
+  { id:'deploy',  name:'部署',     dur:10, c0:1020, c1:1058 },
+  { id:'pm',      name:'小地方',   dur:12, c0:1140, c1:1350 },
+  { id:'night',   name:'深夜',     dur:14, c0:1380, c1:1439 }
+];
+let TOTAL = 0;
+for (const c of CH) { c.t0 = TOTAL; TOTAL += c.dur; }
+function chapterIndex(t) { for (let i = CH.length - 1; i >= 0; i--) if (t >= CH[i].t0) return i; return 0; }
+function clockAt(t) {
+  const c = CH[chapterIndex(t)], lt = t - c.t0;
+  if (c.clock) return c.clock(lt);
+  return lerp(c.c0, c.c1, clamp(lt / c.dur, 0, 1));
+}
+const fmtClock = m => { m = Math.floor(m) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+
+// 状态栏数值：全部是时间的纯函数 → 拖动时间轴永远不会错乱
+function keyInterp(keys, t) {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) if (t < keys[i][0]) {
+    const a = keys[i - 1], b = keys[i]; return lerp(a[1], b[1], ease((t - a[0]) / (b[0] - a[0])));
+  }
+  return keys[keys.length - 1][1];
+}
+const stepCount = (arr, t) => { let n = 0; for (const x of arr) if (t >= x) n++; return n; };
+const ENERGY = [[0,12],[9,22],[12,30],[20,34],[26,72],[36,82],[47,50],[51,72],[57,22],[60.5,92],[68,58],[80,40],[86,78],[95,48],[98,18],[106,10],[116,8],[117.5,96],[120,12]];
+const COFFEE_T = [26, 40.5, 67, 73];
+const COMMIT_T = [39.2, 41.6, 44, 46.3, 81.5, 86.2, 104];
+const BUG_K = [[60.2,1],[62,3],[64,5],[79.4,1],[81.5,0],[104.5,1]];
+function bugsAt(t) { let v = 0; for (const k of BUG_K) if (t >= k[0]) v = k[1]; return v; }
+
+/* ================= 天气（每天随机，但对同一天是确定的） ================= */
+let day = 0;
+function rainAt(min) {
+  let a, b;
+  if (day === 0) { a = 835; b = 1065; }            // 第一天：午后必下一场雨
+  else { const h = hash(day * 7.3); if (h < .35) return 0; a = 450 + hash(day * 3.1) * 700; b = a + 90 + hash(day * 9.7) * 260; }
+  if (min < a || min > b) return 0;
+  return clamp(Math.min(min - a, b - min) / 25, 0, 1); // 渐入渐出
+}
+
+/* ================= 角色 ================= */
+// 主角与同事共用同一套骨架。x = 身体中心列，y = 脚底线（最下一行像素在 y-1）
+const SIT = new Set(['sit', 'type', 'drink', 'sleepy', 'eat', 'facepalmSit', 'scratchSit', 'think', 'boot']);
+const HERO = { hair: P.ink, top: P.deep, topD: P.night, pants: P.navy, style: 'messy', glasses: true };
+function guy(x, y, o) {
+  o = Object.assign({}, HERO, o);
+  const d = o.dir || 1, t = o.t || 0, pose = o.pose || 'stand';
+  const skin = o.skin || P.skin, hair = o.hair, top = o.top, topD = o.topD || P.night, pants = o.pants;
+  const sit = SIT.has(pose);
+  let bob = 0; const f4 = Math.floor(t * 8) % 4;
+  if (pose === 'walk') bob = (f4 & 1) ? -1 : 0;
+  if (pose === 'cheer') bob = -Math.round(Math.abs(Math.sin(t * 9)) * 3);
+  const Y = y + bob;
+  const r = (dx, dy, w, h, c) => R(d > 0 ? x + dx : x - dx - w + 1, Y + dy, w, h, c);
+  const T = -15;                         // 躯干顶
+  let hx = 0, hy = 0;                    // 头部偏移（低头 / 打瞌睡）
+  if (pose === 'sleepy') { hx = 1; hy = 2 + Math.round(Math.sin(t * 2) * .6); }
+  if (pose === 'facepalm' || pose === 'facepalmSit') hy = 1;
+  if (pose === 'boot') hx = 1;
+  const HT = T - 6 + hy;
+
+  // --- 腿 ---
+  if (o.bag) r(-6, T + 1, 3, 7, o.bag);  // 背包
+  if (sit) {
+    r(-3, -8, 8, 2, pants); r(3, -6, 2, 5, pants); r(3, -1, 3, 1, P.ink);
+  } else if (pose === 'walk') {
+    const swap = f4 === 2, back = swap ? pants : P.night, front = swap ? P.night : pants;
+    if (f4 % 2 === 0) {
+      r(-2, -7, 2, 3, back); r(-3, -4, 2, 3, back); r(-4, -1, 3, 1, P.ink);
+      r(0, -7, 2, 3, front); r(1, -4, 2, 3, front); r(1, -1, 3, 1, P.ink);
+    } else { r(-2, -7, 2, 6, P.night); r(-1, -7, 2, 6, pants); r(-1, -1, 3, 1, P.ink); }
+  } else {
+    r(-2, -7, 2, 6, P.night); r(0, -7, 2, 6, pants); r(-2, -1, 2, 1, P.ink); r(0, -1, 3, 1, P.ink);
+  }
+  // --- 躯干 ---
+  r(-3, T, 7, 8, top); r(-3, T, 1, 8, topD); r(-2, T, 3, 1, topD); // 连帽衫的帽子褶
+  if (o.tie) r(1, T + 1, 1, 4, o.tie);
+  if (o.badge) px(d > 0 ? x + 2 : x - 2, Y + T + 3, P.white);
+  // --- 头 ---
+  r(-2 + hx, HT, 6, 6, skin);
+  const st = o.style;
+  if (st === 'messy') { r(-3 + hx, HT - 1, 6, 2, hair); r(-3 + hx, HT + 1, 2, 3, hair); r(-2 + hx, HT - 2, 1, 1, hair); r(1 + hx, HT - 2, 1, 1, hair); r(3 + hx, HT - 1, 1, 1, hair); }
+  else if (st === 'long') { r(-3 + hx, HT - 1, 6, 2, hair); r(-3 + hx, HT + 1, 2, 7, hair); }
+  else if (st === 'bun') { r(-3 + hx, HT - 1, 6, 2, hair); r(-3 + hx, HT + 1, 2, 3, hair); r(-5 + hx, HT - 2, 3, 3, hair); }
+  else if (st === 'bald') { r(-3 + hx, HT + 2, 2, 2, hair); px(d > 0 ? x + hx : x - hx, Y + HT, P.peach); }
+  else if (st === 'cap') { r(-3 + hx, HT - 1, 6, 2, o.cap || P.red); r(3 + hx, HT, 3, 1, o.cap || P.red); r(-3 + hx, HT + 1, 2, 2, hair); }
+  else { r(-3 + hx, HT - 1, 6, 2, hair); r(-3 + hx, HT + 1, 2, 2, hair); }
+  if (o.beard) r(0 + hx, HT + 4, 4, 2, hair);
+  // 屏幕光映在脸上
+  if (o.glow) dith(d > 0 ? x + 1 + hx : x - 3 - hx, Y + HT, 3, 6, o.glow, o.glowLvl || 7);
+  // 眼睛
+  let eye = o.eyes || 'open';
+  if (eye === 'open' && fr(t * .31 + (o.seed || 0)) < .05) eye = 'closed';   // 眨眼
+  if (['sleepy', 'stretch'].includes(pose)) eye = 'closed';
+  const ex = 2 + hx, ey = HT + 2;
+  if (o.glasses) { r(ex - 1, ey - 1, 3, 3, o.glow || P.light); r(ex - 1, ey - 1, 3, 1, P.ink); }
+  if (eye === 'closed') r(ex - 1, ey + (o.glasses ? 1 : 0), 2, 1, P.dbrown);
+  else if (eye === 'wide') { r(ex, ey - 1, 1, 2, P.ink); }
+  else { r(ex, ey, 1, 1, P.ink); if (eye === 'tired') r(ex - 1, ey + 2, 2, 1, P.clay); }
+  // 嘴
+  const talking = o.talk && (Math.floor(t * 7) % 2 === 0);
+  if (pose === 'stretch' || o.mouth === 'o' || pose === 'cheer') r(2 + hx, HT + 4, 2, 2, P.wine);
+  else if (talking) r(2 + hx, HT + 4, 2, 1, P.wine);
+  else if (o.mouth === 'smile') { r(2 + hx, HT + 4, 2, 1, P.dbrown); px(d > 0 ? x + 4 + hx : x - 4 - hx, Y + HT + 3, P.dbrown); }
+  else r(3 + hx, HT + 4, 1, 1, P.clay);
+  if (o.phones) { r(-2 + hx, HT - 2, 5, 1, P.ink); r(-1 + hx, HT + 1, 2, 3, P.red); }
+  if (o.sweat) { r(5 + hx, HT, 1, 2, P.cyan); px(d > 0 ? x + 5 + hx : x - 5 - hx, Y + HT - 1, P.white); }
+
+  // --- 手臂（在头之后画，才能挡住脸） ---
+  const k = Math.floor(t * 10) % 2;
+  switch (pose) {
+    case 'type': case 'boot':
+      r(0, T + 1, 2, 3, top); r(1, T + 4, 5, 2, top);
+      r(6, T + 4 + k, 2, 1, skin); r(5, T + 5 - k, 1, 1, P.clay); break;
+    case 'drink':
+      r(0, T + 1, 2, 3, top); r(2, T - 1, 2, 5, top); r(3, T - 2, 2, 2, skin);
+      r(4, T - 5, 3, 4, o.mug || P.white); px(d > 0 ? x + 7 : x - 7, Y + T - 4, o.mug || P.white); break;
+    case 'hold':
+      r(0, T - 6, 2, 7, top); r(0, T - 8, 2, 2, skin); break;
+    case 'phone':
+      r(0, T + 1, 2, 3, top); r(1, T + 3, 3, 2, top); r(4, T, 2, 4, P.ink); r(4, T + 1, 1, 2, P.cyan); break;
+    case 'stretch': case 'cheer':
+      r(-3, T - 7, 2, 8, top); r(2, T - 7, 2, 8, top); r(-3, T - 8, 2, 1, skin); r(2, T - 8, 2, 1, skin); break;
+    case 'scratch': case 'scratchSit':
+      r(1, T - 3, 2, 4, top); r(-1 + k, HT - 2, 3, 2, skin);
+      px(d > 0 ? x - 3 : x + 3, Y + HT - 3 - k, P.gray); px(d > 0 ? x + 4 : x - 4, Y + HT - 4 + k, P.gray); break;
+    case 'facepalm': case 'facepalmSit':
+      r(1, T - 1, 2, 3, top); r(1, HT + 1, 4, 3, skin); break;
+    case 'point':
+      r(0, T + 1, 2, 2, top); r(1, T + 2, 6, 2, top); r(7, T + 2, 2, 1, skin); break;
+    case 'eat': {
+      const up = Math.floor(t * 1.6) % 2;
+      r(0, T + 1, 2, 3, top);
+      if (up) { r(2, T - 1, 2, 5, top); r(3, T - 2, 2, 2, skin); r(5, T - 4, 1, 3, P.sand); r(4, T - 3, 1, 1, P.sand); }
+      else { r(1, T + 4, 4, 2, top); r(5, T + 4, 2, 1, skin); r(7, T + 2, 1, 3, P.sand); }
+      break; }
+    case 'sleepy':
+      r(0, T + 1, 2, 3, top); r(1, T + 4, 5, 2, top); r(6, T + 5, 2, 1, skin); break;
+    case 'think':
+      r(0, T + 1, 2, 3, top); r(2, T - 1, 2, 5, top); r(3, HT + 5, 2, 2, skin); break;
+    case 'wave':
+      r(2, T - 6, 2, 7, top); r(2 + k, T - 8, 2, 2, skin); break;
+    case 'walk': { const sw = f4 === 0 ? 1 : f4 === 2 ? -1 : 0; r(sw, T + 1, 2, 6, top); r(sw, T + 7, 2, 1, skin); break; }
+    default:
+      r(0, T + 1, 2, 6, top); r(0, T + 7, 2, 1, skin);
+  }
+}
+
+// 同事们（同一套骨架，换发型/配色）
+const MATES = {
+  lin:  { hair: P.dbrown, top: P.pink, topD: P.purple, pants: P.navy, style: 'long', glasses: false, seed: .3 },
+  zhao: { hair: P.ink, top: P.green, topD: P.dgreen, pants: P.wine, style: 'cap', cap: P.gold, glasses: false, seed: .6 },
+  wang: { hair: P.slate, top: P.slate, topD: P.navy, pants: P.ink, style: 'bald', beard: true, glasses: true, skin: P.clay, seed: .8 },
+  pm:   { hair: P.wine, top: P.white, topD: P.light, pants: P.navy, style: 'bun', glasses: false, tie: P.red, badge: true, seed: .1 }
+};
+const mate = (name, x, y, o) => guy(x, y, Object.assign({}, MATES[name], o));
+
+/* ---------- 猫（彩蛋：点它会叫） ---------- */
+function cat(x, y, t, o = {}) {
+  const c = P.gold, s = P.tan, meow = o.meow || 0;
+  if (o.sleep && !meow) {
+    // 团成一团
+    R(x, y - 5, 10, 5, c); R(x + 1, y - 6, 8, 1, c); R(x + 2, y - 5, 1, 4, s); R(x + 5, y - 5, 1, 4, s);
+    R(x + 8, y - 7, 3, 3, c); px(x + 8, y - 8, c); px(x + 10, y - 8, c); R(x + 9, y - 6, 2, 1, P.dbrown);
+    R(x - 2, y - 2, 3, 1, c); px(x - 3, y - 3, c);
+    const zz = fr(t * .5);
+    if (zz < .7) text('z', x + 11 + zz * 6, y - 12 - zz * 8, P.light);
+    return;
+  }
+  const up = meow > 0 ? 1 : 0;
+  R(x, y - 6, 9, 5, c); R(x + 2, y - 6, 1, 5, s); R(x + 5, y - 6, 1, 5, s);
+  R(x, y - 1, 2, 1, c); R(x + 7, y - 1, 2, 1, c);
+  R(x + 7, y - 10 - up, 5, 4, c); px(x + 7, y - 11 - up, c); px(x + 11, y - 11 - up, c);
+  px(x + 9, y - 9 - up, P.ink); px(x + 11, y - 9 - up, P.ink);
+  if (meow > 0) R(x + 10, y - 7 - up, 2, 1, P.wine);
+  const sw = Math.round(Math.sin(t * 3) * 2);
+  R(x - 2, y - 6 + sw, 2, 1, c); R(x - 3, y - 8 + sw, 1, 3, c);
+}
+
+/* ---------- AI 助手：屏幕角落的小机器人 ---------- */
+function bot(x, y, t, o = {}) {
+  const b = Math.round(Math.sin(t * 4 + (o.ph || 0)) * 1), s = o.small;
+  const w = s ? 6 : 9, h = s ? 5 : 7;
+  y += b;
+  R(x, y, w, h, o.body || P.light); R(x, y + h - 1, w, 1, P.gray);
+  R(x + 1, y + 1, w - 2, h - 3, P.ink);
+  const blink = fr(t * .4 + (o.ph || 0)) < .06;
+  const ec = o.eye || P.cyan;
+  if (!blink) { px(x + 2, y + 2, ec); px(x + w - 3, y + 2, ec); if (!s) { px(x + 2, y + 3, ec); px(x + w - 3, y + 3, ec); } }
+  else { px(x + 2, y + 3, ec); px(x + w - 3, y + 3, ec); }
+  if (o.happy && !s) { px(x + 3, y + 4, ec); px(x + 4, y + 4, ec); px(x + 5, y + 4, ec); }
+  const ax = x + (w >> 1);
+  R(ax, y - 2, 1, 2, P.gray); px(ax, y - 3, Math.floor(t * 3) % 2 ? P.hot : P.yellow);
+  if (!s) { px(x - 1, y + 3, P.gray); px(x + w, y + 3, P.gray); }
+}
+
+/* ================= 环境：天空 / 窗户 / 家具 / 道具 ================= */
+// 天空关键帧 [分钟, 上, 下]；两帧之间用抖动过渡，颜色永远落在调色板里
+const SKY = [
+  [0, P.ink, P.night], [360, P.ink, P.night], [420, P.night, P.purple], [440, P.navy, P.salmon], [470, P.deep, P.peach],
+  [540, P.blue, P.cyan], [960, P.blue, P.cyan], [1030, P.deep, P.gold], [1080, P.purple, P.orange], [1120, P.night, P.pink],
+  [1170, P.ink, P.purple], [1230, P.ink, P.night], [1440, P.ink, P.night]
+];
+function skyAt(min) {
+  for (let i = 1; i < SKY.length; i++) if (min < SKY[i][0]) { const a = SKY[i - 1], b = SKY[i]; return [a, b, (min - a[0]) / (b[0] - a[0])]; }
+  return [SKY[SKY.length - 1], SKY[SKY.length - 1], 0];
+}
+function drawSky(x, y, w, h, min) {
+  const [a, b, f] = skyAt(min), lv = Math.round(f * 16);
+  const half = Math.ceil(h * .55);
+  R(x, y, w, h, a[1]); dith(x, y + half, w, h - half, a[2], 8); R(x, y + h - Math.ceil(h * .25), w, Math.ceil(h * .25), a[2]);
+  R(x, y, w, half - 2, a[1]);
+  if (lv) { // 叠上下一帧
+    dith(x, y, w, half, b[1], lv); dith(x, y + half, w, h - half, b[2], lv);
+  }
+  const night = min < 400 || min > 1150;
+  if (night) for (let i = 0; i < w * h / 260; i++) { const sx = x + hash(i * 3.7) * w, sy = y + hash(i * 5.1) * h * .6; if (hash(i * 9 + Math.floor(min / 7)) > .2) px(sx, sy, hash(i * 2.2) > .7 ? P.yellow : P.light); }
+  return night;
+}
+// 雨：滴落的斜线 + 天色变灰
+function drawRain(x, y, w, h, amt, t, c) {
+  if (amt <= 0) return;
+  dith(x, y, w, h, P.slate, Math.round(amt * 7));
+  const n = Math.round(w * h / 60 * amt);
+  for (let i = 0; i < n; i++) {
+    const sp = 90 + hash(i * 1.3) * 40;
+    const rx = x + fr(hash(i * 7.1) + t * .05) * w, ry = y + fr(hash(i * 3.3) + t * sp / h) * h;
+    if (ry + 3 < y + h) { px(rx, ry, c || P.light); px(rx - 1, ry + 2, c || P.gray); }
+  }
+}
+// 城市剪影（可平移做视差）
+function skyline(x, y, w, h, off, seed, col, lit, min) {
+  let cx = -(off % 400);
+  let i = Math.floor(off / 400) * 40;
+  g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+  while (cx < w + 40) {
+    const bw = 10 + Math.floor(hash(seed + i * 1.7) * 18), bh = 10 + Math.floor(hash(seed + i * 2.9) * (h - 12));
+    const bx = x + cx, by = y + h - bh;
+    R(bx, by, bw, bh, col);
+    if (hash(seed + i * 4.4) > .7) R(bx + (bw >> 1), by - 4, 1, 4, col);
+    if (lit) for (let wy = by + 3; wy < y + h - 2; wy += 4) for (let wx = bx + 2; wx < bx + bw - 2; wx += 3) {
+      const hh = hash(wx * 1.31 + wy * 7.7 + seed + i);
+      const on = hh > (min > 1400 ? .8 : .55) && hash(hh * 91 + Math.floor((min || 0) / 3)) > .15;
+      if (on) px(wx, wy, hh > .93 ? P.cyan : P.yellow);
+    }
+    cx += bw + 1 + Math.floor(hash(seed + i * 5.3) * 4); i++;
+  }
+  g.restore();
+}
+function drawWindow(x, y, w, h, min, t, o = {}) {
+  R(x - 2, y - 2, w + 4, h + 4, o.frame || P.light);
+  g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+  const night = drawSky(x, y, w, h, min);
+  if (!night && min > 460) { // 云
+    for (let i = 0; i < 3; i++) { const cx = x + fr(hash(i * 4.1) + t * .006 * (i + 1)) * (w + 30) - 15, cy = y + 4 + i * 6;
+      R(cx, cy, 12, 3, P.white); R(cx + 3, cy - 2, 6, 2, P.white); }
+  }
+  if (min > 330 && min < 450 && !o.noSun) circ(x + w * .7, y + h - (min - 330) / 120 * h * .9, 3, P.gold);
+  if (night && o.moon !== false) { circ(x + w * .75, y + 7, 3, P.sand); circ(x + w * .75 + 2, y + 6, 2, skyAt(min)[0][1]); }
+  skyline(x, y + h - (o.sky || 14), w, o.sky || 14, o.off || 0, o.seed || 3, night ? P.ink : P.slate, night || min > 1100, min);
+  drawRain(x, y, w, h, rainAt(min), t);
+  g.restore();
+  R(x + (w >> 1) - 1, y, 2, h, o.frame || P.light); R(x, y + (h >> 1), w, 1, o.frame || P.light);
+  if (rainAt(min) > .3) for (let i = 0; i < 4; i++) { const dy = fr(hash(i * 8) + t * .15) * h; px(x + 3 + hash(i * 2) * (w - 6), y + dy, P.cyan); }
+}
+// 室内色温：清晨暖粉、午后金黄、傍晚紫、深夜暗
+function ambient(min, x = 0, y = 10, w = W, h = H - 10) {
+  if (min >= 1080 && min < 1200) dith(x, y, w, h, P.purple, Math.round(clamp((min - 1080) / 80, 0, 1) * 3));
+  else if (min >= 1200) dith(x, y, w, h, P.ink, 6);
+}
+// 窗户投到地上的光斑：清晨粉、白天亮黄、午后金、傍晚橙
+function sunPatch(x, w, min) {
+  if (min < 430 || min > 1130) return;
+  const c = min < 480 ? P.peach : min < 900 ? P.yellow : min < 1040 ? P.gold : P.orange;
+  const sk = min < 720 ? -1 : 1, lv = rainAt(min) > .3 ? 2 : 4;
+  for (let i = 0; i < 8; i++) dith(x + sk * i * 3, FLOOR + i * 2, w, 2, c, lv);
+}
+
+/* ---------- 家具 ---------- */
+function desk(x, y, w) { R(x, y, w, 3, P.brown); R(x, y + 3, w, 1, P.dbrown); R(x + 2, y + 4, 2, 60, P.dbrown); R(x + w - 4, y + 4, 2, 60, P.dbrown); }
+function chair(x, y, c = P.navy) { R(x - 4, y - 7, 9, 2, c); R(x - 5, y - 17, 2, 11, c); R(x, y - 5, 1, 4, P.ink); R(x - 3, y - 1, 7, 1, P.ink); }
+function mug(x, y, level, t, steam, c = P.white) {
+  R(x, y, 5, 5, c); R(x + 5, y + 1, 1, 3, c); R(x + 1, y + 1, 3, 1, level > 0 ? P.dbrown : P.light);
+  if (level > .66) R(x + 1, y + 1, 3, 1, P.wine);
+  if (steam) for (let i = 0; i < 3; i++) { const p = fr(t * .7 + i / 3); if (p < .9) px(x + 1 + i + Math.round(Math.sin(p * 9 + i) * 1), y - 1 - p * 8, p < .5 ? P.light : P.gray); }
+}
+function plant(x, y) { R(x, y - 5, 6, 5, P.rust); R(x + 1, y - 10, 1, 5, P.green); R(x + 3, y - 12, 1, 7, P.lime); R(x + 4, y - 9, 2, 2, P.green); R(x - 1, y - 9, 2, 2, P.lime); }
+// 显示器：内容由回调在 (sx,sy,sw,sh) 里画
+function monitor(x, y, w, h, drawScreen) {
+  R(x - 2, y - 2, w + 4, h + 4, P.ink); R(x - 1, y - 1, w + 2, h + 2, P.navy);
+  g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+  if (drawScreen) drawScreen(x, y, w, h); else R(x, y, w, h, P.ink);
+  g.restore();
+  R(x + (w >> 1) - 2, y + h + 2, 4, 3, P.navy); R(x + (w >> 1) - 5, y + h + 5, 10, 1, P.navy);
+}
+function keyboard(x, y, t, active) {
+  R(x, y, 12, 2, P.gray); R(x, y + 2, 12, 1, P.slate);
+  if (active) px(x + 1 + Math.floor(hash(Math.floor(t * 12)) * 10), y, P.white);
+}
+function coffeeMachine(x, y, t, brewing) {
+  R(x, y, 14, 20, P.navy); R(x, y, 14, 3, P.slate); R(x + 2, y + 5, 10, 5, P.ink);
+  px(x + 3, y + 6, brewing ? P.lime : P.red); text('Cf', x + 5, y + 5, P.cyan);
+  R(x + 5, y + 11, 4, 2, P.slate);
+  if (brewing) { const p = Math.floor(t * 12) % 3; px(x + 7, y + 13 + p, P.dbrown); px(x + 7, y + 14, P.dbrown); }
+  R(x, y + 18, 14, 2, P.slate);
+}
+
+/* ---------- 代码屏（彩蛋：真实代码） ---------- */
+const CODE = [
+  ['// user permission check', 'c'],
+  ['function canDeploy(user) {', 'k'],
+  ['  if (user.role = "admin") {', 'b'],
+  ['    return true;', 'k'],
+  ['  }', 'n'],
+  ['  return user.tests >= 0;', 'k'],
+  ['}', 'n'],
+  ['', 'n'],
+  ['while (!done) {', 'k'],
+  ['  coffee++;', 'n'],
+  ['  code();', 'n'],
+  ['}', 'n'],
+  ['', 'n'],
+  ['for (let i = 1; i <= 15; i++)', 'k'],
+  ['  console.log(i % 15 ? i % 5', 'n'],
+  ['   ? i % 3 ? i : "Fizz"', 's'],
+  ['   : "Buzz" : "FizzBuzz");', 's'],
+  ['', 'n'],
+  ['// TODO: refactor (2019)', 'c'],
+  ['const sleep = () => null;', 'k'],
+  ['git commit -m "fix typo"', 's'],
+  ['', 'n']
+];
+const CODE_COL = { c: P.slate, k: P.cyan, n: P.light, s: P.gold, b: P.light };
+// 画到屏幕上：scroll 为已滚动行数（可带小数），typed 为当前行已打出的字符数
+function codeScreen(x, y, w, h, scroll, typedChars, t, o = {}) {
+  R(x, y, w, h, o.bg || P.ink);
+  const lh = 7, first = Math.floor(scroll), dy = -Math.round((scroll - first) * lh);
+  const rows = Math.ceil(h / lh) + 1;
+  let cursor = null;
+  for (let r = 0; r < rows; r++) {
+    const li = first + r; if (li < 0) continue;
+    const L = CODE[li % CODE.length];
+    const ly = y + 2 + r * lh + dy;
+    text(String((li % 99) + 1).padStart(2, ' '), x + 1, ly, P.navy);
+    let s = L[0];
+    const isLast = r === rows - 2;
+    if (typedChars != null && isLast) { s = s.slice(0, typedChars); cursor = [x + 11 + textW(s) + 1, ly]; }
+    if (typedChars != null && r > rows - 2) continue;
+    let col = CODE_COL[L[1]];
+    if (L[1] === 'b' && o.bugHi) { R(x + 9, ly - 1, w - 9, 7, o.bugHi); col = P.white; }
+    text(s, x + 11, ly, col);
+  }
+  if (cursor && Math.floor(t * 2.5) % 2 === 0) R(cursor[0], cursor[1], 1, 5, P.white);
+}
+
+/* ================= 场景公共 ================= */
+let RT = 0;                                   // 真实时间（秒），只给彩蛋动画用
+const FX = { meow: -99, refill: -99, extra: 0, snooze: -99, bot: -99, poke: -99 };
+const since = k => RT - FX[k];
+const FLOOR = 150;
+function Zs(x, y, t) { for (let i = 0; i < 3; i++) { const p = fr(t * .45 + i / 3); if (p < .85) text(p < .4 ? 'z' : 'Z', x + p * 9 + i, y - p * 16, P.light); } }
+// 台词：在 [a,b) 时间内显示
+const say = (lt, a, b, x, y, s, cls) => (lt >= a && lt < b) ? { x, y, s, cls } : null;
+function room(min, wall, wallD) {
+  R(0, 0, W, H, wall); for (let x = 0; x < W; x += 24) R(x, 10, 1, FLOOR - 10, wallD);
+  R(0, FLOOR - 4, W, 4, wallD); R(0, FLOOR, W, H - FLOOR, P.wine); dith(0, FLOOR, W, H - FLOOR, P.dbrown, 6);
+  for (let x = 6; x < W; x += 30) R(x, FLOOR + 6, 14, 1, P.dbrown);
+}
+// 桌上的咖啡：随时间变空，续杯彩蛋会让它重新满上
+function mugLevel(t) {
+  let lv = 1 - fr(clamp((t - 29.4) / 26, 0, .999));
+  if (t > 57.5) lv = 1 - clamp((t - 57.5) / 14, 0, 1);
+  if (t > 71) lv = 1 - clamp((t - 71) / 30, 0, .95);
+  if (since('refill') < 30) lv = Math.max(lv, 1 - since('refill') / 30);
+  return lv;
+}
+// 近景：屏幕特写 + 前景后脑勺
+function closeup(t, drawScreen, o = {}) {
+  R(0, 0, W, H, P.ink); dith(0, 10, W, H, P.night, 8);
+  R(28, 16, 264, 124, P.navy); R(30, 18, 260, 120, P.ink);
+  g.save(); g.beginPath(); g.rect(32, 20, 256, 116); g.clip(); drawScreen(32, 20, 256, 116); g.restore();
+  R(150, 140, 20, 8, P.navy); R(130, 148, 60, 3, P.navy);
+  // 桌面 + 键盘
+  R(0, 150, W, 30, P.dbrown); R(0, 150, W, 2, P.brown);
+  R(96, 156, 128, 14, P.slate); R(96, 168, 128, 2, P.navy);
+  for (let ky = 0; ky < 3; ky++) for (let kx = 0; kx < 15; kx++) {
+    const hit = o.typing && hash(kx * 3 + ky * 17 + Math.floor(t * 14)) > .9;
+    R(99 + kx * 8, 158 + ky * 4 - (hit ? 0 : 0), 6, 3, hit ? P.white : P.gray);
+  }
+  // 后脑勺（带耳机），边缘被屏幕打亮
+  const hx = 70, hy = 146 + Math.round(Math.sin(t * 1.3)), rim = o.rim || P.cyan;
+  R(hx - 22, hy + 18, 44, 20, P.deep); R(hx - 22, hy + 18, 44, 1, P.night); R(hx - 7, hy + 12, 14, 7, P.clay);
+  R(hx - 20, hy - 3, 3, 7, P.clay); R(hx + 18, hy - 3, 3, 7, P.clay);
+  circ(hx, hy, 17, rim); circ(hx, hy + 1, 17, P.ink);
+  for (const [dx, dy] of [[-8, -19], [-2, -20], [5, -20], [11, -18]]) { R(hx + dx, hy + dy, 2, 2, P.ink); px(hx + dx, hy + dy - 1, rim); }
+  if (o.phones) { R(hx - 17, hy - 20, 34, 3, P.navy); R(hx - 20, hy - 6, 6, 12, P.red); R(hx + 15, hy - 6, 6, 12, P.red); }
+  // 手（打字）
+  if (o.typing) { const k = Math.floor(t * 10) % 2; R(120, 160 + k, 10, 5, P.skin); R(176, 161 - k, 10, 5, P.skin); R(112, 163, 10, 8, P.deep); R(186, 163, 10, 8, P.deep); }
+  // 咖啡
+  mug(250, 144, mugLevel(t), t, false, P.white);
+}
+
+// 卧室墙面：海报 + 书架 + 地毯
+function bedroomDecor() {
+  R(186, 40, 30, 36, P.sand); R(186, 40, 30, 2, P.clay); R(189, 45, 24, 14, P.ink);
+  text('>_', 191, 48, P.lime); text('HELLO', 191, 62, P.dbrown); text('WORLD', 191, 68, P.dbrown);
+  R(236, 74, 50, 3, P.brown);
+  [[P.red, 9], [P.deep, 11], [P.gold, 8], [P.green, 10], [P.purple, 9], [P.light, 7]].forEach(([c, h], i) => R(238 + i * 5, 74 - h, 4, h, c));
+  R(270, 64, 12, 10, P.light); R(272, 66, 8, 6, P.ink); px(274, 68, P.cyan);   // 旧笔记本电脑
+  R(36, FLOOR + 4, 100, 6, P.purple); for (let x = 40; x < 132; x += 8) R(x, FLOOR + 6, 4, 2, P.pink);
+}
+
+/* ================= 1. 07:00 闹钟 ================= */
+Object.assign(CH[0], {
+  mood: 'morning',
+  clock: lt => lt < 3.2 ? 420 : lt < 6 ? 429 : lt < 8.6 ? 438 : 447 + (lt - 8.6) * 1.2,
+  sfx: [[.3, 'alarm'], [3.2, 'alarm'], [6, 'alarm'], [8.6, 'alarmLoud'], [1.8, 'snooze'], [4.6, 'snooze'], [7.4, 'snooze'], [10.2, 'yawn']],
+  draw(lt, t) {
+    const min = clockAt(t);
+    room(min, P.night, P.ink);
+    drawWindow(36, 40, 74, 58, min, t, { seed: 11 });
+    R(32, 99, 82, 3, P.light);
+    sunPatch(40, 70, min);
+    bedroomDecor();
+    // 床
+    R(144, 104, 5, 46, P.dbrown); R(144, 102, 5, 2, P.brown);
+    R(148, 128, 122, 6, P.dbrown); R(150, 134, 3, 16, P.dbrown); R(265, 134, 3, 16, P.dbrown);
+    R(148, 123, 122, 5, P.light);
+    // 床头柜 + 闹钟
+    R(116, 124, 26, 26, P.brown); R(116, 124, 26, 2, P.clay); R(119, 132, 20, 1, P.dbrown);
+    const ringing = [[.3, 1.8], [3.2, 4.6], [6, 7.4], [8.6, 9.8]].some(([a, b]) => lt >= a && lt < b) || since('snooze') < .6;
+    const sh = ringing ? (Math.floor(lt * 20) % 2) : 0;
+    R(121 + sh, 113, 16, 11, P.red); R(123 + sh, 115, 12, 7, P.ink);
+    text(fmtClock(min).slice(1), 124 + sh, 116, ringing && Math.floor(lt * 4) % 2 ? P.hot : P.lime);
+    R(122 + sh, 111, 3, 2, P.red); R(133 + sh, 111, 3, 2, P.red);
+    if (ringing) { px(118, 110, P.yellow); px(117, 113, P.yellow); px(140, 110, P.yellow); px(141, 113, P.yellow); }
+    const upT = 8.8;
+    if (lt < upT) {
+      // 躺着：枕头、脑袋、被子
+      R(150, 118, 16, 6, P.white); R(150, 123, 16, 1, P.light);
+      R(154, 112, 7, 7, P.skin); R(153, 111, 5, 8, P.ink); R(154, 110, 6, 2, P.ink);
+      const hitAt = [1.8, 4.6, 7.4].find(h => lt > h - .5 && lt < h + .35);
+      if (hitAt != null) {
+        const p = clamp((lt - (hitAt - .5)) / .5, 0, 1), ex = lerp(160, 128, p), ey = lerp(120, 111, p);
+        line(160, 121, ex, ey, P.deep); line(160, 122, ex, ey + 1, P.deep); R(ex - 1, ey - 1, 3, 2, P.skin);
+      }
+      R(158, 116, 3, 1, P.dbrown);                               // 闭着的眼
+      R(160, 117, 100, 8, P.red); R(160, 117, 100, 1, P.salmon); R(180, 119, 1, 5, P.dred); R(215, 118, 1, 6, P.dred); R(250, 115, 12, 3, P.red);
+      if (!ringing) Zs(166, 108, lt);
+    } else if (lt < 9.8) {
+      R(186, 118, 76, 7, P.red); R(186, 118, 76, 1, P.salmon);
+      guy(172, 130, { pose: 'sit', t: lt, eyes: 'wide', sweat: true });
+    } else if (lt < 10.9) {
+      guy(130, FLOOR, { pose: 'stretch', t: lt });
+      R(186, 118, 76, 7, P.red);
+    } else {
+      R(186, 118, 76, 7, P.red);
+      guy(lerp(128, 40, (lt - 10.9) / 1.1), FLOOR, { pose: 'walk', dir: -1, t: lt, eyes: 'tired' });
+    }
+    // 猫一直在被子上睡觉（点它会叫）
+    cat(226, 118, t, { sleep: true, meow: since('meow') < 1.2 ? 1 : 0 });
+    ambient(min);
+  },
+  bub(lt) {
+    return [say(lt, 1.9, 3.1, 160, 104, '再睡五分钟……', 'think'), say(lt, 4.7, 5.9, 160, 104, '再五分钟……', 'think'),
+      say(lt, 7.5, 8.5, 160, 104, '最后一次……', 'think'), say(lt, 8.8, 10.2, 172, 104, '要迟到了！！', 'shout')];
+  },
+  hits(lt) { return [{ x: 220, y: 104, w: 24, h: 16, id: 'cat' }, { x: 118, y: 108, w: 22, h: 16, id: 'clock' }]; }
+});
+
+/* ================= 2. 08:30 通勤 ================= */
+Object.assign(CH[1], {
+  mood: 'commute',
+  sfx: [[.1, 'train'], [7.4, 'ding']],
+  draw(lt, t) {
+    const min = clockAt(t), sway = Math.round(Math.sin(lt * 3.1) * .8);
+    // 窗外：两层城市剪影视差滚动
+    R(0, 0, W, H, P.light);
+    for (const wx of [8, 116, 224]) {
+      const x = wx, y = 34, w = 88, h = 48;
+      g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+      drawSky(x, y, w, h, min);
+      skyline(x, y + 14, w, h - 14, lt * 40 + wx, 5, P.slate, false, min);
+      skyline(x, y + 24, w, h - 24, lt * 120 + wx * 2, 9, P.navy, false, min);
+      const pole = (lt * 260 + wx * 3) % 200; R(x + w - pole, y, 3, h, P.ink);
+      drawRain(x, y, w, h, rainAt(min), t);
+      g.restore();
+      R(x - 3, y - 3, w + 6, 3, P.gray); R(x - 3, y + h, w + 6, 3, P.gray); R(x - 3, y, 3, h, P.gray); R(x + w, y, 3, h, P.gray);
+      dith(x, y, w, h, P.white, 2);   // 玻璃反光
+    }
+    g.save(); g.translate(0, sway);
+    R(0, 10, W, 8, P.gray); R(0, 22, W, 2, P.slate);                     // 行李架/扶杆
+    for (let i = 0; i < 9; i++) { const hx = 18 + i * 36, sw = Math.round(Math.sin(lt * 3.1 + i * .4) * 2);
+      line(hx, 24, hx + sw, 31, P.slate); R(hx - 2 + sw, 31, 5, 5, P.white); R(hx - 1 + sw, 32, 3, 3, P.light); }
+    R(108, 24, 2, 126, P.light); R(214, 24, 2, 126, P.light);
+    // 座椅 + 睡着的乘客
+    R(0, 128, 104, 8, P.blue); R(0, 136, 104, 3, P.deep); R(220, 128, 100, 8, P.blue); R(220, 136, 100, 3, P.deep);
+    mate('wang', 30, 136, { pose: 'sleepy', t: lt });
+    mate('lin', 70, 136, { pose: 'phone', t: lt, glow: P.cyan, glowLvl: 5 });
+    guy(250, 136, { pose: 'sleepy', t: lt + 1, hair: P.gold, top: P.orange, topD: P.rust, style: 'short', glasses: false });
+    mate('zhao', 290, 136, { pose: 'sleepy', t: lt + 2, dir: -1 });
+    Zs(40, 110, lt); Zs(258, 110, lt + .5);
+    R(0, FLOOR, W, H - FLOOR, P.slate); for (let x = 0; x < W; x += 8) R(x, FLOOR + 3, 4, 1, P.navy);
+    // 主角：拉着吊环，另一只手刷手机
+    guy(160, FLOOR, { pose: lt < 5 ? 'phone' : 'hold', t: lt, glow: lt < 5 ? P.cyan : null, glowLvl: 6, eyes: 'tired', bag: P.green });
+    g.restore();
+    // 隧道灯闪过
+    if (Math.floor(lt * 3) % 5 === 0) dith(0, 10, W, H, P.ink, 2);
+  },
+  bub(lt) {
+    return [say(lt, 1.2, 4.2, 160, 122, '昨晚的 PR 还没人 review……', 'think'),
+      say(lt, 7.5, 9.6, 160, 50, '前方到站：软件园', 'shout')];
+  },
+  hits() { return []; }
+});
+
+/* ================= 3. 09:30 到工位 + 站会 ================= */
+function officeBg(min, t, o = {}) {
+  room(min, min >= 1080 ? P.navy : P.slate, min >= 1080 ? P.night : P.navy);
+  drawWindow(226, 26, 78, 50, min, t, { seed: 21, off: 60 });
+  sunPatch(222, 84, min);
+  R(222, 77, 86, 3, P.light);
+  // 看板
+  R(40, 26, 92, 50, P.sand); R(40, 26, 92, 2, P.clay);
+  text('TODO', 44, 30, P.dbrown); text('DOING', 74, 30, P.dbrown); text('DONE', 108, 30, P.dbrown);
+  R(71, 30, 1, 42, P.clay); R(104, 30, 1, 42, P.clay);
+  for (let i = 0; i < 4; i++) R(44 + (i % 2) * 12, 38 + (i >> 1) * 9, 10, 7, [P.yellow, P.salmon, P.cyan, P.yellow][i]);
+  R(76, 38, 10, 7, P.lime); R(88, 38, 10, 7, P.yellow);
+  R(108, 38, 10, 7, P.lime);
+  if (o.blocked) { R(76, 50, 24, 9, P.red); text('BLOCK', 78, 52, P.white); }
+  plant(12, 150);
+}
+function deskSet(t, o = {}) {
+  desk(112, 122, 100);
+  monitor(146, 94, 36, 22, o.screen);
+  keyboard(160, 119, t, o.typing);
+  if (o.mug !== false) mug(196, 116, mugLevel(t), t, o.steam);
+  R(118, 110, 12, 12, P.navy); R(120, 112, 8, 2, P.slate);   // 主机
+  chair(140, FLOOR);
+}
+Object.assign(CH[2], {
+  mood: 'office',
+  sfx: [[3, 'boot'], [5.6, 'coffee'], [8.6, 'whoosh']],
+  draw(lt, t) {
+    const min = clockAt(t);
+    if (lt < 8.6) {
+      officeBg(min, t);
+      R(24, 120, 48, 30, P.navy); R(24, 118, 48, 3, P.gray);
+      const brewing = (lt > 5.6 && lt < 7.4) || since('refill') < 1.6;
+      coffeeMachine(38, 98, t, brewing);
+      const booting = lt > 2.8;
+      deskSet(t, {
+        mug: lt > 7.4, steam: lt > 7.4,
+        screen: (x, y, w, h) => {
+          if (!booting) return R(x, y, w, h, P.ink);
+          if (lt < 4.2) { R(x, y, w, h, P.deep); circ(x + 18, y + 9, 3, P.white); R(x + 8, y + 16, Math.min(20, (lt - 2.8) * 16), 2, P.white); }
+          else { R(x, y, w, h, P.night); R(x + 2, y + 2, 14, 8, P.blue); R(x + 18, y + 2, 16, 18, P.navy); for (let i = 0; i < 4; i++) R(x + 20, y + 4 + i * 4, 10 - i * 2, 1, P.light); }
+        }
+      });
+      if (lt > 5.6 && lt < 7.4) mug(46, 113, (lt - 5.6) / 1.8, t, true);
+      let x, pose = 'walk', dir = 1;
+      if (lt < 2.6) x = lerp(-10, 140, lt / 2.6);
+      else if (lt < 4.4) { x = 140; pose = 'boot'; }
+      else if (lt < 5.6) { x = lerp(140, 76, (lt - 4.4) / 1.2); dir = -1; }
+      else if (lt < 7.4) { x = 76; pose = 'stand'; dir = -1; }
+      else { x = 76; pose = 'drink'; dir = 1; }
+      guy(x, FLOOR, { pose, dir, t: lt, bag: lt < 2.6 ? P.green : null, glow: pose === 'boot' ? P.cyan : null, eyes: lt < 7.4 ? 'tired' : 'open', mug: P.white });
+      if (pose === 'drink') for (let i = 0; i < 3; i++) { const p = fr(lt * .8 + i / 3); px(82 + i, 128 - p * 10, P.light); }
+      if (lt < 2.6) R(118, 146, 10, 4, P.green);
+      ambient(min);
+    } else {
+      // 站会：五个人，每个人都说"没有阻塞"，看板上却挂着 BLOCK
+      officeBg(min, t, { blocked: true });
+      const L = lt - 8.6;
+      mate('pm', 64, FLOOR, { t: lt, talk: L < .9 || L > 4.7, dir: 1 });
+      mate('lin', 118, FLOOR, { t: lt, talk: L > .9 && L < 1.8, dir: -1 });
+      mate('zhao', 150, FLOOR, { t: lt, talk: L > 1.9 && L < 2.8, dir: -1 });
+      mate('wang', 182, FLOOR, { t: lt, talk: L > 2.9 && L < 3.8, dir: -1 });
+      guy(214, FLOOR, { pose: L > 3.8 && L < 4.8 ? 'stand' : 'drink', t: lt, dir: -1, talk: L > 3.9 && L < 4.8, sweat: L > 3.9 && L < 4.8, mug: P.white });
+      ambient(min);
+    }
+  },
+  bub(lt) {
+    const L = lt - 8.6;
+    return [say(lt, .4, 2.4, 60, 110, '早……', 'think'),
+      say(lt, 5.8, 7.4, 76, 110, '续命时间', 'think'),
+      say(L, 0, .9, 64, 124, '站会，一人一句', ''),
+      say(L, .9, 1.9, 118, 124, '没有阻塞', ''), say(L, 1.9, 2.9, 150, 124, '没有阻塞', ''),
+      say(L, 2.9, 3.9, 182, 124, '没有阻塞', ''), say(L, 3.9, 4.8, 214, 124, '没……没有阻塞', ''),
+      say(L, 4.8, 5.4, 64, 124, '很好，散会！', 'shout')];
+  },
+  hits(lt) { return lt < 8.6 ? [{ x: 36, y: 96, w: 18, h: 24, id: 'coffee' }] : []; }
+});
+COFFEE_T[0] = 29.4;
+
+/* ================= 4. 10:30 心流 ================= */
+const CODE_CUM = []; { let s = 0; for (const l of CODE) { CODE_CUM.push(s); s += l[0].length + 3; } CODE_CUM.push(s); }
+function typedPos(chars) { // 已打出的字符数 → [行, 行内字符]
+  const tot = CODE_CUM[CODE.length], loops = Math.floor(chars / tot); let c = chars - loops * tot, i = 0;
+  while (i < CODE.length - 1 && CODE_CUM[i + 1] <= c) i++;
+  return [loops * CODE.length + i, Math.min(CODE[i][0].length, Math.floor(c - CODE_CUM[i]))];
+}
+function ide(x, y, w, h, t, file) {
+  R(x, y, w, h, P.ink); R(x, y, w, 7, P.night); R(x + 1, y + 1, textW(file) + 4, 6, P.ink); text(file, x + 3, y + 1, P.light);
+  R(x, y + 7, 38, h - 7, P.night);
+  const files = ['src', ' app.js', ' auth.js', ' ci.yml', 'test', ' auth.t.js'];
+  files.forEach((f, i) => text(f, x + 2, y + 10 + i * 7, f.trim() === file ? P.yellow : P.gray));
+}
+function toast(x, y, s, c) { const w = textW(s) + 6; R(x - w, y, w, 9, c); R(x - w, y + 8, w, 1, P.ink); text(s, x - w + 3, y + 2, P.ink); }
+Object.assign(CH[3], {
+  mood: 'flow',
+  sfx: [],
+  draw(lt, t) {
+    const [line, ch] = typedPos(lt * 17 + 4);
+    closeup(t, (x, y, w, h) => {
+      ide(x, y, w, h, t, 'auth.js');
+      codeScreen(x + 38, y + 7, w - 38, h - 7, Math.max(0, line - 14), ch, t);
+      for (let i = 0; i < 4; i++) if (t >= COMMIT_T[i] && t < COMMIT_T[i] + 1.6) toast(x + w - 3, y + 10, 'commit #' + (i + 1) + ' ok', P.lime);
+    }, { typing: true, phones: true, rim: P.cyan });
+    // 心流：世界的边缘慢慢暗下去
+    const v = Math.round(clamp(lt / 3, 0, 1) * 6);
+    dith(0, 10, 28, H, P.ink, v + 4); dith(292, 10, 28, H, P.ink, v + 4); dith(0, 10, W, 8, P.ink, v + 4);
+    if (lt > 2 && lt < 10) { const n = Math.floor(lt * 3) % 4; text('~'.repeat(n + 1), 24, 150, P.purple); }
+  },
+  bub(lt) {
+    return [say(lt, 7.6, 9.2, 300, 120, '在忙吗？', ''), say(lt, 9.6, 10.8, 300, 120, '……好的。', '')];
+  },
+  hits(lt) { return [{ x: 246, y: 138, w: 14, h: 12, id: 'mug' }]; }
+});
+
+/* ================= 5. 12:00 午饭 ================= */
+Object.assign(CH[4], {
+  mood: 'lunch',
+  sfx: [[.4, 'slurp'], [3, 'slurp']],
+  draw(lt, t) {
+    const min = clockAt(t);
+    room(min, P.clay, P.brown);
+    drawWindow(98, 26, 124, 56, min, t, { seed: 33, off: 200, sky: 18 });
+    R(94, 83, 132, 3, P.sand);
+    sunPatch(100, 120, min);
+    // 冰箱 + 微波炉
+    R(14, 70, 30, 80, P.light); R(14, 100, 30, 1, P.gray); R(40, 80, 2, 8, P.gray); R(40, 106, 2, 8, P.gray);
+    R(20, 78, 6, 5, P.yellow); R(28, 84, 5, 6, P.salmon);          // 冰箱贴
+    R(252, 96, 40, 24, P.navy); R(254, 98, 26, 20, P.ink); text('0:42', 257, 105, P.lime); R(252, 120, 48, 30, P.brown);
+    // 桌子与面
+    R(110, 126, 100, 3, P.sand); R(112, 129, 3, 21, P.clay); R(205, 129, 3, 21, P.clay);
+    for (const [bx, s] of [[128, 0], [182, 1.3]]) {
+      R(bx, 120, 12, 6, P.white); R(bx + 1, 126, 10, 1, P.light); R(bx + 1, 120, 10, 2, P.gold);
+      for (let i = 0; i < 3; i++) { const p = fr(lt * .6 + i / 3 + s); px(bx + 3 + i * 3 + Math.round(Math.sin(p * 8)), 118 - p * 10, p < .5 ? P.white : P.light); }
+    }
+    chair(114, FLOOR, P.dbrown); chair(206, FLOOR, P.dbrown);
+    guy(116, FLOOR, { pose: 'eat', t: lt, eyes: lt > 5 ? 'open' : 'open' });
+    mate('lin', 204, FLOOR, { pose: 'eat', t: lt + .6, dir: -1, talk: lt > 2.4 && lt < 3.6 });
+    mate('zhao', 240, FLOOR, { pose: lt < 4.2 ? 'phone' : 'stand', t: lt, dir: -1, talk: (lt > .8 && lt < 2.2) || (lt > 4.2 && lt < 5.4), glow: lt < 4.2 ? P.cyan : null });
+    ambient(min);
+  },
+  bub(lt) {
+    return [say(lt, .8, 2.3, 240, 124, '这家外卖又涨价了', ''), say(lt, 2.4, 3.8, 204, 124, '下午还有需求评审……', ''),
+      say(lt, 4.2, 5.5, 240, 124, '你怎么不说话？', ''), say(lt, 5.5, 7.6, 116, 124, '（还在想那个缓存）', 'think')];
+  },
+  hits() { return []; }
+});
+
+/* ================= 6. 14:00 犯困 → 线上告警 ================= */
+function errGraph(x, y, w, h, lt, a) {
+  R(x, y, w, h, P.ink);
+  for (let i = 0; i < w; i += 2) {
+    const v = lt < a ? 2 + hash(i) * 3 : 2 + hash(i + Math.floor(lt * 4)) * 3 + (i > w * .55 ? (i - w * .55) / (w * .45) * (h - 8) : 0);
+    R(x + i, y + h - v, 1, v, i > w * .55 && lt >= a ? P.red : P.lime);
+  }
+}
+Object.assign(CH[5], {
+  mood: 'alert', moodAt: lt => lt < 3.8 ? 'sleepy' : 'alert',
+  sfx: [[3.8, 'siren'], [5.2, 'siren'], [6.6, 'siren']],
+  draw(lt, t) {
+    const min = clockAt(t), A = 3.8, al = lt >= A;
+    officeBg(min, t);
+    deskSet(t, { typing: al, screen: (x, y, w, h) => {
+      if (!al) { codeScreen(x, y, w, h, 2, null, t, { bg: P.night }); dith(x, y, w, h, P.ink, 8); return; }
+      R(x, y, w, h, Math.floor(lt * 4) % 2 ? P.red : P.dred); text('P0', x + 2, y + 2, P.white); text('5XX', x + 15, y + 2, P.yellow);
+      errGraph(x + 2, y + 9, w - 4, h - 11, lt, A);
+    }});
+    let pose = 'sleepy', eyes = 'open';
+    if (al) { pose = lt > 7 && lt < 9.4 ? 'scratchSit' : 'type'; eyes = 'wide'; }
+    guy(140, FLOOR, { pose, t: lt, eyes, glow: al ? P.red : null, sweat: al && lt > 5 });
+    if (!al) Zs(146, 118, lt);
+    if (al && lt < 5) { R(141, 108, 2, 5, P.yellow); R(141, 114, 2, 1, P.yellow); }
+    // 同事围过来
+    if (lt > 4.6) mate('wang', lerp(330, 196, clamp((lt - 4.6) / 1.2, 0, 1)), FLOOR, { pose: lt < 5.8 ? 'walk' : 'stand', dir: -1, t: lt, talk: lt > 5.9 && lt < 7 });
+    if (lt > 5.1) mate('zhao', lerp(340, 226, clamp((lt - 5.1) / 1.2, 0, 1)), FLOOR, { pose: lt < 6.3 ? 'walk' : 'scratch', dir: -1, t: lt, talk: lt > 7 && lt < 8.2 });
+    if (lt > 5.4) mate('lin', lerp(-10, 100, clamp((lt - 5.4) / 1.2, 0, 1)), FLOOR, { pose: lt < 6.6 ? 'walk' : 'stand', dir: 1, t: lt, talk: lt > 8.2 && lt < 9.4 });
+    ambient(min);
+    if (al) dith(0, 10, W, H - 10, P.red, Math.floor(lt * 4) % 2 ? 3 : 1);   // 告警红光
+  },
+  bub(lt) {
+    return [say(lt, 3.9, 5.6, 140, 104, 'P0 告警！！', 'shout'), say(lt, 5.9, 7, 196, 124, '谁动了线上？', ''),
+      say(lt, 7, 8.2, 226, 124, '不……不是我', ''), say(lt, 8.2, 9.4, 100, 124, '要不先回滚？', ''),
+      say(lt, 9.5, 11.6, 140, 104, '先看日志……', '')];
+  },
+  hits() { return [{ x: 194, y: 108, w: 12, h: 14, id: 'mug' }]; }
+});
+COFFEE_T[1] = 57.5;
+
+/* ================= 7. 15:30 和 AI 搭档排查 ================= */
+const TESTS = [['unit', 2.4, 1], ['api', 3.2, 1], ['e2e', 4.2, 1], ['auth', 4.8, 0]];
+Object.assign(CH[6], {
+  mood: 'ai',
+  sfx: [[.4, 'type'], [2.2, 'bot'], [3.6, 'split'], [7.4, 'ok'], [8.4, 'ok'], [9.2, 'ok'], [9.8, 'fail'], [10.6, 'found'], [12.2, 'facepalm'], [13.5, 'fix']],
+  draw(lt, t) {
+    const min = clockAt(t);
+    if (lt < 12) {
+      closeup(t, (x, y, w, h) => {
+        ide(x, y, 150, h, t, 'auth.js');
+        const found = lt > 10.2;
+        codeScreen(x + 38, y + 7, 112, h - 7, 0, null, t, { bugHi: found ? (Math.floor(lt * 4) % 2 ? P.red : P.dred) : null });
+        // 右侧终端
+        const tx = x + 152, tw = w - 152;
+        R(tx, y, tw, h, P.night); R(tx, y, tw, 7, P.navy); text('terminal', tx + 2, y + 1, P.light);
+        const q = '> why can anyone deploy?';
+        text(q.slice(0, Math.floor(clamp(lt - .3, 0, 2) * 14)), tx + 2, y + 10, P.lime);
+        if (lt > 2.2) text('ok! splitting x4...', tx + 2, y + 18, P.cyan);
+        TESTS.forEach(([name, dur, pass], i) => {
+          const ry = y + 30 + i * 13, p = clamp((lt - 5) / dur, 0, 1);
+          if (lt < 3.8) return;
+          text(name, tx + 12, ry, P.light);
+          R(tx + 32, ry, 60, 5, P.ink); R(tx + 32, ry, Math.round(58 * p), 5, p < 1 ? P.gold : pass ? P.lime : P.red);
+          if (p >= 1) text(pass ? 'ok' : 'FAIL', tx + 94 - (pass ? 0 : 6), ry, pass ? P.lime : P.red);
+        });
+        if (lt > 11.2) { text('git blame L3:', tx + 2, y + 86, P.gray); text('you, 11:00 am', tx + 2, y + 93, P.yellow); }
+        // AI 助手本体 + 分身
+        const bx = x + w - 18, by = y + h - 16;
+        const happy = lt > 2.2 && lt < 3.6 || since('bot') < 2;
+        bot(bx, by, t, { happy });
+        if (lt > 3.6) TESTS.forEach((_, i) => {
+          const ry = y + 30 + i * 13;
+          let mx = tx + 3, my = ry - 1;
+          if (lt < 4.6) { const p = ease((lt - 3.6) / 1); mx = lerp(bx + 1, mx, p); my = lerp(by + 1, my, p) - Math.sin(p * 3.14) * 10; }
+          else if (lt > 10) { const p = ease(clamp((lt - 10) / .8, 0, 1)); mx = lerp(mx, x + 150 - 16 - i * 7, p); my = lerp(my, y + 17 - 10, p); }
+          bot(mx, my, t, { small: true, ph: i * 1.7, eye: i === 3 && lt > 9.8 ? P.red : P.cyan });
+        });
+        if (lt > 10.6) { const ax = x + 38 + 11 + 16 * 4 + 1; R(ax, y + 29, 1, 4, P.yellow); px(ax - 1, y + 30, P.yellow); px(ax + 1, y + 30, P.yellow); }
+      }, { typing: lt < 2.2, rim: lt > 10.2 ? P.red : P.cyan });
+    } else {
+      officeBg(min, t);
+      const fixed = lt > 13.5;
+      deskSet(t, { typing: fixed, screen: (x, y, w, h) => {
+        R(x, y, w, h, fixed ? P.dgreen : P.dred); text(fixed ? '===' : '=', x + 3, y + 3, P.white);
+        bot(x + w - 11, y + h - 9, t, { happy: true, small: true });
+      }});
+      guy(140, FLOOR, { pose: fixed ? 'type' : 'facepalmSit', t: lt, glow: fixed ? P.lime : P.red });
+      // 小分身在显示器上蹦
+      for (let i = 0; i < 4; i++) bot(146 + i * 9, 86 - Math.abs(Math.round(Math.sin(lt * 6 + i) * 3)), t, { small: true, ph: i });
+      ambient(min);
+    }
+  },
+  bub(lt) {
+    return [say(lt, .6, 2.1, 110, 118, '交给你了。', ''), say(lt, 2.2, 3.6, 250, 147, '收到！分头行动～', 'ai'),
+      say(lt, 10.6, 11.9, 250, 147, '找到了：少了一个等号！', 'ai'),
+      say(lt, 12.2, 13.5, 140, 104, '……是我自己写的。', ''), say(lt, 13.6, 15.6, 164, 76, '已修复，再跑一遍～', 'ai'),
+      say(since('bot') < 1.6 && lt < 12 ? 0 : -1, 0, 1, 250, 147, '嗨，人类！我在呢～', 'ai')];
+  },
+  hits(lt) { return lt < 12 ? [{ x: 266, y: 116, w: 16, h: 16, id: 'bot' }] : [{ x: 194, y: 108, w: 12, h: 14, id: 'mug' }]; }
+});
+COFFEE_T[2] = 71;
+
+/* ================= 8. 17:00 CI 变绿，部署 ================= */
+const STAGES = [['build', .6, 1.8], ['test', 1.8, 3.4], ['lint', 3.4, 4.4], ['deploy', 4.4, 6.2]];
+Object.assign(CH[7], {
+  mood: 'deploy', moodAt: lt => lt < 6.2 ? 'ci' : 'deploy',
+  sfx: [[1.8, 'ok'], [3.4, 'ok'], [4.4, 'ok'], [6.2, 'deploy']],
+  draw(lt, t) {
+    const min = clockAt(t);
+    if (lt < 6.9) {
+      closeup(t, (x, y, w, h) => {
+        R(x, y, w, h, P.night); R(x, y, w, 9, P.navy); text('CI / main', x + 4, y + 2, P.white);
+        const sx = x + 44, sw = 46;
+        text('#241', x + 6, y + 20, P.gray); text('#242', x + 6, y + 44, P.white);
+        STAGES.forEach(([n, a, b], i) => {
+          const bx = sx + i * (sw + 6);
+          R(bx, y + 16, sw, 13, P.dred); text(n, bx + 3, y + 20, P.salmon); text('x', bx + sw - 6, y + 20, P.white);
+          const st = lt < a ? 0 : lt < b ? 1 : 2, c = [P.navy, P.gold, P.green][st];
+          R(bx, y + 40, sw, 13, c); text(n, bx + 3, y + 44, st ? P.ink : P.gray);
+          if (st === 1) { const k = Math.floor(lt * 8) % 4; px(bx + sw - 6 + [0, 1, 1, 0][k], y + 44 + [0, 0, 1, 1][k], P.ink); }
+          if (st === 2) { px(bx + sw - 7, y + 46, P.white); px(bx + sw - 6, y + 47, P.white); px(bx + sw - 5, y + 46, P.white); px(bx + sw - 4, y + 45, P.white); }
+          if (i < 3) R(bx + sw, y + 46, 6, 1, P.slate);
+        });
+        if (lt > 6.2) { const f = Math.floor(lt * 6) % 2; R(x + 40, y + 70, 176, 26, f ? P.lime : P.green); textC('DEPLOYED  v2.4.2', x + 128, y + 80, P.ink); }
+        else text('running...', x + 44, y + 70, P.gray);
+      }, { typing: false, rim: lt > 6.2 ? P.lime : P.cyan });
+    } else {
+      officeBg(min, t);
+      deskSet(t, { screen: (x, y, w, h) => { R(x, y, w, h, P.green); text('OK', x + 13, y + 8, P.white); } });
+      const L = lt - 6.9;
+      guy(140, FLOOR, { pose: 'cheer', t: L, mouth: 'o' });
+      mate('lin', 100, FLOOR, { pose: 'cheer', t: L + .3 });
+      mate('zhao', 226, FLOOR, { pose: 'cheer', t: L + .15, dir: -1 });
+      mate('wang', 256, FLOOR, { pose: 'wave', t: L, dir: -1, mouth: 'smile' });
+      for (let i = 0; i < 30; i++) { const p = fr(L * .5 + hash(i)); px(60 + hash(i * 3) * 220 + Math.sin(p * 9 + i) * 3, 20 + p * 130, [P.yellow, P.cyan, P.salmon, P.lime][i % 4]); }
+      ambient(min);
+    }
+  },
+  bub(lt) {
+    return [say(lt, 7.1, 9.8, 100, 116, '（小声）耶——', ''), say(lt, 7.5, 9.8, 226, 116, '（小声）稳！', ''), say(lt, 8, 9.8, 140, 100, '（小声）下班！', '')];
+  },
+  hits() { return []; }
+});
+
+/* ================= 9. 19:00 "就改一个小地方" ================= */
+function lamp(x, on) {
+  R(x - 8, 10, 16, 2, P.gray); R(x - 6, 12, 12, 1, on ? P.yellow : P.slate);
+  if (on) { dith(x - 9, 13, 18, 5, P.yellow, 3); dith(x - 16, FLOOR, 32, 5, P.yellow, 4); }
+}
+Object.assign(CH[8], {
+  mood: 'pm', moodAt: lt => lt < 5.5 ? 'pm' : 'overtime',
+  clock: lt => lt < 5.5 ? 1140 + lt : lt < 11 ? lerp(1145.5, 1350, ease((lt - 5.5) / 5.5)) : 1350 + (lt - 11) * 2,
+  sfx: [[3.2, 'uhoh'], [5.5, 'whoosh'], [9.6, 'facepalm'], [10, 'commit']],
+  draw(lt, t) {
+    const min = clockAt(t);
+    officeBg(min, t);
+    const work = lt >= 5.5 && lt < 10.4;
+    deskSet(t, { typing: work, screen: (x, y, w, h) => {
+      if (!work) { R(x, y, w, h, P.night); text('bye', x + 12, y + 8, P.gray); return; }
+      R(x, y, w, h, P.ink); const k = Math.floor(clamp((lt - 5.5) / 4.5, 0, 1) * 1024);
+      text('+' + k, x + 2, y + 2, P.lime); text('-' + Math.floor(k * .75), x + 2, y + 9, P.red);
+      text(Math.floor(lt * 6) % 2 ? '>>' : ' >', x + 24, y + 15, P.gold);
+    }});
+    ambient(min);
+    const offAt = [6.4, 7.4, 99, 8.6];
+    [40, 120, 200, 280].forEach((x, i) => lamp(x, lt < offAt[i]));
+    let hx = 140, pose = 'sit', dir = 1, eyes = 'open', sweat = false;
+    if (lt < .6) pose = 'stand';
+    else if (lt < 3.1) { pose = 'walk'; hx = lerp(140, 226, (lt - .6) / 2.5); }
+    else if (lt < 5.5) { pose = lt < 4.4 ? 'stand' : 'scratch'; hx = 226; eyes = 'wide'; sweat = true; }
+    else if (lt < 9.6) pose = 'type';
+    else if (lt < 10.4) pose = 'facepalmSit';
+    else { pose = 'walk'; hx = lerp(140, 330, (lt - 10.4) / 1.6); eyes = 'tired'; }
+    guy(hx, FLOOR, { pose, dir, t: lt, eyes, sweat, bag: pose === 'sit' || pose === 'type' || pose === 'facepalmSit' ? null : P.green, glow: work ? P.cyan : null });
+    if (work) R(118, 146, 10, 4, P.green);
+    if (lt > 2.4 && lt < 5.6) {
+      const px_ = lerp(334, 262, clamp((lt - 2.4) / .8, 0, 1));
+      mate('pm', px_, FLOOR, { pose: lt < 3.2 ? 'walk' : 'point', dir: -1, t: lt, talk: lt > 3.2 && lt < 4.6, mouth: 'smile' });
+    }
+    if (lt > 5.8 && lt < 7.2) mate('zhao', lerp(60, -12, (lt - 5.8) / 1.4), FLOOR, { pose: 'walk', dir: -1, t: lt, bag: P.purple });
+    if (lt > 6.8 && lt < 8.4) mate('lin', lerp(270, 334, (lt - 6.8) / 1.6), FLOOR, { pose: 'walk', dir: 1, t: lt, bag: P.pink });
+    if (work) text('>> x40', 236, 14, Math.floor(lt * 3) % 2 ? P.gold : P.orange);
+  },
+  bub(lt) {
+    return [say(lt, 3.2, 5.2, 262, 124, '就改一个小地方。', 'shout'), say(lt, 4.2, 5.5, 226, 104, '……', 'think'),
+      say(lt, 6.2, 7.4, 60, 124, '走了啊～', ''), say(lt, 9.6, 10.6, 140, 104, '小……地……方……', 'think')];
+  },
+  hits() { return [{ x: 194, y: 108, w: 12, h: 14, id: 'mug' }]; }
+});
+
+/* ================= 10. 23:00 深夜 → 第二天 ================= */
+Object.assign(CH[9], {
+  mood: 'night', moodAt: lt => lt < 10.4 ? 'night' : 'idea',
+  sfx: [[10.4, 'idea'], [12.4, 'alarmSoft']],
+  draw(lt, t) {
+    const min = clockAt(t);
+    if (lt < 5) {
+      drawSky(0, 10, W, 170, min);
+      circ(262, 38, 9, P.sand); circ(266, 35, 8, P.ink); px(258, 36, P.peach); px(256, 42, P.peach);
+      const pan = lt * 8;
+      skyline(0, 90, W, 78, pan * .4 + 100, 41, P.night, true, min);
+      skyline(0, 118, W, 50, pan + 300, 77, P.ink, true, min);
+      // 公司大楼：最后一盏灯在 2.5 秒熄灭
+      const bx = 150 - pan;
+      R(bx, 70, 36, 98, P.ink); R(bx + 16, 62, 2, 8, P.ink); px(bx + 16, 60, Math.floor(lt * 2) % 2 ? P.hot : P.dred);
+      for (let wy = 0; wy < 8; wy++) for (let wx = 0; wx < 5; wx++) {
+        const lit = wy === 3 && wx === 2 ? lt < 2.5 : hash(wx * 7 + wy * 13) > .72;
+        R(bx + 4 + wx * 6, 76 + wy * 10, 3, 4, lit ? (wy === 3 && wx === 2 ? P.cyan : P.yellow) : P.night);
+      }
+      R(0, 168, W, 12, P.night); R(0, 168, W, 1, P.navy);
+      for (let lx = 20; lx < W; lx += 70) { R(lx, 150, 1, 18, P.slate); R(lx - 2, 149, 5, 1, P.slate); dith(lx - 8, 150, 17, 18, P.yellow, 2); px(lx, 150, P.yellow); }
+      if (lt > 2.8) guy(lerp(120, 200, (lt - 2.8) / 2.2), 178, { pose: 'walk', t: lt, bag: P.green, eyes: 'tired' });
+      drawRain(0, 10, W, 170, rainAt(min), t);
+      return;
+    }
+    const L = lt - 5;
+    room(min, P.night, P.ink);
+    drawWindow(36, 40, 74, 58, min, t, { seed: 11 });
+    R(32, 99, 82, 3, P.light);
+    bedroomDecor();
+    R(144, 104, 5, 46, P.dbrown); R(148, 128, 122, 6, P.dbrown); R(150, 134, 3, 16, P.dbrown); R(265, 134, 3, 16, P.dbrown); R(148, 123, 122, 5, P.light);
+    R(116, 124, 26, 26, P.brown); R(121, 113, 16, 11, P.red); R(123, 115, 12, 7, P.ink); text(fmtClock(min).slice(1), 124, 116, P.lime);
+    R(128, 122, 6, 2, P.ink); R(130, 118, 2, 4, P.ink); px(131, 117, P.cyan);   // 充电中的手机
+    dith(40, 150, 90, 30, P.deep, 5);   // 月光
+    const up = L > 7.4;
+    if (!up) {
+      R(150, 118, 16, 6, P.white);
+      R(154, 112, 7, 7, P.skin); R(153, 111, 5, 8, P.ink); R(154, 110, 6, 2, P.ink);
+      if (L > 5.4) { R(158, 115, 2, 2, P.white); px(159, 116, P.ink); } else R(158, 116, 3, 1, P.dbrown);
+      R(160, 117, 100, 8, P.red); R(160, 117, 100, 1, P.salmon); R(180, 119, 1, 5, P.dred); R(250, 115, 12, 3, P.red);
+      if (L < 5.4) Zs(166, 108, L);
+    } else {
+      R(186, 118, 76, 7, P.red);
+      guy(172, 130, { pose: 'think', t: L, eyes: 'wide' });
+    }
+    cat(220, 117, t, { sleep: true, meow: since('meow') < 1.2 ? 1 : 0 });
+    ambient(min);
+    if (L > 5.8) {   // 灵光一闪的灯泡
+      const bx = up ? 172 : 157, by = up ? 94 : 96, on = Math.floor(L * 6) % 3 !== 0 || L > 6.6;
+      circ(bx, by, 3, on ? P.yellow : P.gold); R(bx - 1, by + 3, 3, 2, P.gray);
+      if (on) for (const [dx, dy] of [[-6, 0], [6, 0], [0, -6], [-4, -4], [4, -4]]) px(bx + dx, by + dy, P.yellow);
+    }
+  },
+  bub(lt) {
+    const L = lt - 5;
+    return [say(lt, .4, 2.4, 168, 60, '最后一盏灯', 'think'), say(L, 6.2, 8.6, 160, 88, '等等……这里可以用 reduce！', 'think'),
+      say(L, 8.6, 9, 172, 88, '！', 'shout')];
+  },
+  hits(lt) { return lt >= 5 ? [{ x: 216, y: 104, w: 20, h: 16, id: 'cat' }] : []; }
+});
+
+/* ================= 声音：WebAudio 实时合成 8-bit ================= */
+const AU = {
+  ctx: null, master: null, music: null, sfx: null, muted: true, started: false, nextBeat: 0, step: 0, mood: '',
+  init() {
+    if (this.ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain(); this.master.gain.value = 0; this.master.connect(this.ctx.destination);
+    this.music = this.ctx.createGain(); this.music.gain.value = .32; this.music.connect(this.master);
+    this.sfx = this.ctx.createGain(); this.sfx.gain.value = .55; this.sfx.connect(this.master);
+    // 噪声缓冲（键盘、鼓、雨）
+    const n = this.ctx.sampleRate; this.noise = this.ctx.createBuffer(1, n, n);
+    const d = this.noise.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  },
+  setMuted(m) {
+    this.muted = m; if (!this.ctx) return;
+    if (!m && this.ctx.state === 'suspended') this.ctx.resume();
+    const g_ = this.master.gain, now = this.ctx.currentTime;
+    g_.cancelScheduledValues(now); g_.setValueAtTime(g_.value, now); g_.linearRampToValueAtTime(m ? 0 : .8, now + .15);
+  },
+  tone(f, when, dur, type = 'square', vol = .2, dest = this.music, slide = 0) {
+    const c = this.ctx, o = c.createOscillator(), g_ = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, when);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f * slide), when + dur);
+    g_.gain.setValueAtTime(0.0001, when); g_.gain.linearRampToValueAtTime(vol, when + .005);
+    g_.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    o.connect(g_); g_.connect(dest); o.start(when); o.stop(when + dur + .02);
+  },
+  hiss(when, dur, vol = .15, hp = 3000, dest = this.sfx) {
+    const c = this.ctx, s = c.createBufferSource(), f = c.createBiquadFilter(), g_ = c.createGain();
+    s.buffer = this.noise; f.type = 'highpass'; f.frequency.value = hp;
+    g_.gain.setValueAtTime(vol, when); g_.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    s.connect(f); f.connect(g_); g_.connect(dest); s.start(when, Math.random() * .5); s.stop(when + dur + .02);
+  },
+  // ----- 音效 -----
+  play(name) {
+    if (!this.ctx || this.muted) return;
+    const t = this.ctx.currentTime + .01, T = (f, a, d, ty, v, s) => this.tone(f, t + a, d, ty || 'square', v || .2, this.sfx, s || 0);
+    switch (name) {
+      case 'alarm': for (let i = 0; i < 6; i++) T(i % 2 ? 1320 : 1760, i * .2, .12, 'square', .13); break;
+      case 'alarmLoud': for (let i = 0; i < 8; i++) T(i % 2 ? 1320 : 1760, i * .14, .1, 'square', .18); break;
+      case 'alarmSoft': T(880, 0, .2, 'triangle', .1); T(1320, .25, .3, 'triangle', .1); break;
+      case 'snooze': this.hiss(t, .06, .3, 800); T(220, 0, .08, 'square', .15, .5); break;
+      case 'yawn': T(300, 0, .7, 'triangle', .12, .6); break;
+      case 'train': for (let i = 0; i < 6; i++) { this.hiss(t + i * .55, .12, .12, 300); this.hiss(t + i * .55 + .14, .12, .1, 300); } break;
+      case 'ding': T(988, 0, .5, 'triangle', .18); T(784, .35, .7, 'triangle', .18); break;
+      case 'boot': [523, 659, 784, 1047].forEach((f, i) => T(f, i * .09, .25, 'triangle', .12)); break;
+      case 'coffee': for (let i = 0; i < 14; i++) this.hiss(t + i * .1, .08, .12, 1500 + Math.random() * 2000); T(1568, 1.5, .12, 'square', .1); T(2093, 1.62, .2, 'square', .1); break;
+      case 'whoosh': this.hiss(t, .35, .18, 1200); break;
+      case 'key': this.hiss(t, .03, .22, 2500); T(180 + Math.random() * 60, 0, .025, 'square', .05); break;
+      case 'commit': T(784, 0, .07, 'square', .12); T(1175, .07, .12, 'square', .12); break;
+      case 'slurp': this.hiss(t, .4, .12, 900); T(400, 0, .3, 'sine', .08, 1.8); break;
+      case 'siren': for (let i = 0; i < 3; i++) T(660, i * .4, .38, 'sawtooth', .12, 1.5); break;
+      case 'type': for (let i = 0; i < 10; i++) { this.hiss(t + i * .11, .03, .2, 2500); } break;
+      case 'bot': T(1200, 0, .06, 'square', .12); T(1600, .07, .06, 'square', .12); T(2000, .14, .1, 'square', .12); break;
+      case 'split': for (let i = 0; i < 4; i++) T(600 + i * 300, i * .1, .12, 'square', .12, 1.6); break;
+      case 'ok': T(1047, 0, .08, 'square', .12); T(1568, .08, .12, 'square', .12); break;
+      case 'fail': T(220, 0, .25, 'square', .15, .7); T(196, .22, .3, 'square', .15, .7); break;
+      case 'found': [880, 1175, 1480, 1760].forEach((f, i) => T(f, i * .06, .12, 'square', .12)); break;
+      case 'facepalm': this.hiss(t, .08, .35, 400); T(150, 0, .12, 'triangle', .2, .5); break;
+      case 'fix': T(659, 0, .1, 'square', .12); T(880, .1, .2, 'square', .12); break;
+      case 'deploy': [523, 659, 784, 1047, 784, 1047].forEach((f, i) => T(f, i * .11, i === 5 ? .6 : .14, 'square', .14)); break;
+      case 'uhoh': T(494, 0, .2, 'triangle', .18); T(370, .22, .45, 'triangle', .18); break;
+      case 'idea': [1047, 1319, 1568, 2093].forEach((f, i) => T(f, i * .07, .3, 'triangle', .13)); break;
+      case 'meow': T(700, 0, .35, 'sawtooth', .08, 1.5); T(900, .12, .3, 'triangle', .1, .6); break;
+      case 'click': T(1400, 0, .03, 'square', .1); break;
+      case 'refill': this.play('coffee'); break;
+      case 'poke': T(1800, 0, .05, 'square', .1); T(2400, .06, .08, 'square', .1); break;
+    }
+  },
+  // ----- 背景音乐：按章节换情绪，用音频时钟提前排程 -----
+  // 每个情绪：bpm、音阶根音、旋律（音阶级数，-1 休止）、低音、是否打击
+  MOODS: {
+    morning:  { bpm: 84,  root: 60, sc: [0, 2, 4, 7, 9], mel: [0, -1, 2, -1, 4, 3, 2, -1, 1, -1, 2, -1, 0, -1, -1, -1], bass: [0, 0, 5, 5], drum: 0, lead: 'triangle' },
+    commute:  { bpm: 104, root: 57, sc: [0, 2, 3, 5, 7, 8, 10], mel: [0, 2, 4, 2, 5, 4, 2, -1, 0, 2, 4, 6, 5, 4, 2, -1], bass: [0, 0, 3, 4], drum: 1, lead: 'square' },
+    office:   { bpm: 112, root: 60, sc: [0, 2, 4, 5, 7, 9, 11], mel: [0, 2, 4, 5, 4, 2, 0, -1, 4, 5, 6, 7, 6, 4, 2, -1], bass: [0, 5, 3, 4], drum: 1, lead: 'square' },
+    flow:     { bpm: 128, root: 62, sc: [0, 3, 5, 7, 10], mel: [0, 2, 4, 2, 5, 4, 2, 1, 0, 2, 4, 5, 7, 5, 4, 2], bass: [0, 0, 3, 4], drum: 2, lead: 'square', arp: true },
+    lunch:    { bpm: 96,  root: 65, sc: [0, 2, 4, 7, 9], mel: [4, -1, 2, 4, 5, -1, 4, -1, 2, 1, 0, -1, 2, -1, -1, -1], bass: [0, 3, 4, 0], drum: 1, lead: 'triangle' },
+    sleepy:   { bpm: 64,  root: 55, sc: [0, 2, 4, 7, 9], mel: [2, -1, -1, 1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1], bass: [0, 0, 0, 0], drum: 0, lead: 'triangle' },
+    alert:    { bpm: 150, root: 57, sc: [0, 1, 3, 5, 7, 8, 10], mel: [0, 0, 5, 0, 4, 0, 3, 1, 0, 0, 5, 0, 6, 5, 4, 1], bass: [0, 0, 1, 0], drum: 2, lead: 'sawtooth' },
+    ai:       { bpm: 118, root: 64, sc: [0, 2, 4, 6, 7, 9, 11], mel: [0, 4, 7, 4, 2, 6, 9, 6, 0, 4, 7, 11, 9, 7, 6, 4], bass: [0, 3, 5, 4], drum: 1, lead: 'square', arp: true },
+    ci:       { bpm: 120, root: 60, sc: [0, 2, 4, 5, 7, 9, 11], mel: [0, -1, 0, -1, 2, -1, 2, -1, 4, -1, 4, -1, 5, 5, 6, 6], bass: [0, 0, 4, 4], drum: 1, lead: 'square' },
+    deploy:   { bpm: 132, root: 60, sc: [0, 2, 4, 5, 7, 9, 11], mel: [7, 4, 7, 9, 7, 4, 2, 4, 7, 4, 7, 11, 9, 7, 9, 11], bass: [0, 3, 4, 0], drum: 2, lead: 'square' },
+    pm:       { bpm: 90,  root: 58, sc: [0, 2, 3, 5, 7, 8, 10], mel: [4, -1, 3, -1, 2, -1, 1, -1, 0, -1, -1, -1, -1, -1, -1, -1], bass: [0, 0, 5, 5], drum: 0, lead: 'triangle' },
+    overtime: { bpm: 176, root: 58, sc: [0, 2, 3, 5, 7, 8, 10], mel: [0, 2, 3, 2, 0, 2, 3, 5, 3, 2, 0, 2, 3, 2, 0, -1], bass: [0, 0, 5, 4], drum: 2, lead: 'square' },
+    night:    { bpm: 70,  root: 57, sc: [0, 2, 4, 7, 9], mel: [4, -1, 2, -1, 0, -1, 2, -1, 1, -1, -1, -1, 0, -1, -1, -1], bass: [0, 5, 3, 4], drum: 0, lead: 'triangle' },
+    idea:     { bpm: 100, root: 60, sc: [0, 2, 4, 7, 9], mel: [0, 2, 4, 7, 9, 7, 9, 12, -1, -1, -1, -1, -1, -1, -1, -1], bass: [0, 0, 0, 0], drum: 0, lead: 'triangle' }
+  },
+  note(m, deg) { const sc = m.sc, o = Math.floor(deg / sc.length), i = ((deg % sc.length) + sc.length) % sc.length; return 440 * Math.pow(2, (m.root + sc[i] + 12 * o - 69) / 12); },
+  // 每帧调用：rate = 播放倍速（暂停时为 0）
+  tick(mood, rate, typing) {
+    if (!this.ctx || this.muted || this.ctx.state !== 'running') return;
+    const c = this.ctx, now = c.currentTime;
+    if (mood !== this.mood) { this.mood = mood; this.step = 0; this.nextBeat = Math.max(this.nextBeat, now + .05); }
+    if (!rate) { this.nextBeat = now + .05; return; }
+    if (this.nextBeat < now - .2) this.nextBeat = now + .05;
+    const m = this.MOODS[mood] || this.MOODS.office;
+    const spb = 60 / (m.bpm * (rate > 1 ? 1 + (rate - 1) * .25 : 1)) / 2;   // 八分音符
+    while (this.nextBeat < now + .12) {
+      const s = this.step, w = this.nextBeat;
+      const deg = m.mel[s % 16];
+      if (deg >= 0) this.tone(this.note(m, deg + 7), w, spb * .9, m.lead, .07);
+      if (m.arp && s % 2) this.tone(this.note(m, m.bass[(s >> 2) % 4] + 14 + (s % 4)), w, spb * .5, 'square', .03);
+      if (s % 4 === 0) this.tone(this.note(m, m.bass[(s >> 2) % 4]) / 2, w, spb * 3.5, 'triangle', .16);
+      if (m.drum) {
+        if (s % 4 === 0) this.tone(120, w, .12, 'sine', .3, this.music, .4);
+        if (m.drum > 1 && s % 4 === 2) this.hiss(w, .08, .1, 1500, this.music);
+        if (s % 2 === 1) this.hiss(w, .03, .05, 7000, this.music);
+      }
+      if (typing && (s % 2 === 0 || hash(s) > .5)) this.hiss(w + spb * .1, .03, .12, 2500, this.sfx);  // 有节奏的键盘声
+      this.step++; this.nextBeat += spb;
+    }
+  }
+};
+
+/* ================= 主循环 / 状态栏 / 转场 / 交互 ================= */
+CH[2].cuts = [8.6]; CH[6].cuts = [12]; CH[7].cuts = [6.9]; CH[8].cuts = [5.5]; CH[9].cuts = [5];
+let t = 0, playing = true, speed = 1, last = performance.now(), dragging = false;
+const $ = id => document.getElementById(id);
+const stage = $('stage'), ov = $('ov'), tl = $('tl');
+
+function typingAt(t) {
+  const i = chapterIndex(t), lt = t - CH[i].t0;
+  return i === 3 || (i === 5 && lt > 3.8) || (i === 6 && (lt < 2.2 || lt > 13.5)) || (i === 8 && lt > 5.5 && lt < 9.6);
+}
+function fireEvents(a, b) {   // 触发 [a,b) 之间的音效
+  if (b <= a) return;
+  for (const c of CH) for (const [lt, n] of c.sfx) { const e = c.t0 + lt; if (e >= a && e < b) AU.play(n); }
+  for (const e of COMMIT_T) if (e >= a && e < b) AU.play('commit');
+}
+
+/* ---------- 状态栏 ---------- */
+function statusBar() {
+  const min = clockAt(t);
+  R(0, 0, W, 10, P.ink); R(0, 10, W, 1, P.navy);
+  if (min >= 400 && min < 1140) { circ(5, 5, 2, P.gold); } else { circ(5, 5, 2, P.sand); R(6, 3, 2, 3, P.ink); }
+  text(fmtClock(min), 11, 3, P.white);
+  // 精力
+  const en = keyInterp(ENERGY, t);
+  px(36, 2, P.yellow); R(35, 3, 2, 2, P.yellow); R(34, 5, 3, 1, P.yellow); R(35, 6, 2, 1, P.yellow); px(35, 7, P.yellow);
+  R(40, 3, 32, 5, P.navy); R(41, 4, 30, 3, P.ink);
+  const ec = en > 60 ? P.lime : en > 30 ? P.gold : P.red;
+  if (!(en < 20 && Math.floor(RT * 3) % 2)) R(41, 4, Math.round(30 * en / 100), 3, ec);
+  // 咖啡
+  const cups = stepCount(COFFEE_T, t) + FX.extra;
+  R(80, 3, 4, 5, P.white); px(84, 4, P.white); px(84, 5, P.white); R(81, 4, 2, 1, P.dbrown);
+  text('x' + cups, 87, 3, P.sand);
+  // 提交
+  const cm = stepCount(COMMIT_T, t);
+  R(106, 5, 7, 1, P.green); circ(109, 5, 1, P.lime);
+  text(String(cm), 116, 3, P.lime);
+  // bug
+  const bg = bugsAt(t), blink = bg > 0 && Math.floor(RT * 2) % 2;
+  R(134, 3, 4, 5, blink ? P.hot : P.red); px(133, 4, P.ink); px(138, 4, P.ink); px(133, 6, P.ink); px(138, 6, P.ink);
+  px(132, 4, P.gray); px(139, 4, P.gray); px(132, 6, P.gray); px(139, 6, P.gray); px(135, 2, P.gray); px(136, 2, P.gray);
+  text(String(bg), 142, 3, bg ? P.salmon : P.gray);
+  // 右侧：天气 + 第几天
+  if (rainAt(min) > 0) { for (let i = 0; i < 3; i++) R(262 + i * 4, 3 + (i % 2), 1, 3, P.cyan); }
+  const d = 'DAY ' + (day + 1); text(d, W - textW(d) - 3, 3, P.gray);
+}
+
+/* ---------- 画面 ---------- */
+function render() {
+  const i = chapterIndex(t), c = CH[i], lt = t - c.t0;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  c.draw(lt, t);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  // 章节转场：像素抖动淡入淡出；章内切镜头更短
+  const d = Math.min(lt, c.dur - lt);
+  if (d < .5) dith(0, 10, W, H - 10, P.ink, (1 - d / .5) * 16);
+  for (const k of c.cuts || []) { const e = Math.abs(lt - k); if (e < .25) dith(0, 10, W, H - 10, P.ink, (1 - e / .25) * 16); }
+  if (!playing) { R(W - 12, 14, 3, 9, P.white); R(W - 7, 14, 3, 9, P.white); }
+  statusBar();
+}
+
+/* ---------- 台词气泡（DOM 覆盖层，文字清晰且不受最小字号影响） ---------- */
+let lastKey = '';
+function updateBubbles() {
+  const i = chapterIndex(t), c = CH[i], lt = t - c.t0;
+  const list = c.bub(lt).filter(Boolean);
+  if (FX.pop && RT < FX.pop.until) list.push(FX.pop);
+  const card = lt < 2.6 ? fmtClock(clockAt(c.t0 + .01)) + '|' + c.name : '';
+  const key = card + '#' + list.map(b => b.s + b.x + b.y + b.cls).join('|');
+  if (key === lastKey) return;
+  lastKey = key;
+  let h = card ? `<div class="card">${card.split('|')[0]}<small>${String(i + 1).padStart(2, '0')} · ${card.split('|')[1]}</small></div>` : '';
+  for (const b of list) h += `<div class="bb ${b.cls || ''}" style="left:${b.x / W * 100}%;top:${b.y / H * 100}%">${b.s}</div>`;
+  ov.innerHTML = h;
+  // 贴边的气泡往里收，保证文字不溢出画面
+  const ow = ov.clientWidth;
+  for (const el of ov.querySelectorAll('.bb')) {
+    const bw = el.offsetWidth, cx = parseFloat(el.style.left) / 100 * ow;
+    const nx = clamp(cx, bw / 2 + 3, ow - bw / 2 - 3);
+    if (nx !== cx) el.style.left = nx + 'px';
+  }
+}
+
+/* ---------- 尺寸：整数倍放大 ---------- */
+function resize() {
+  const sw = stage.clientWidth, sh = stage.clientHeight, dpr = window.devicePixelRatio || 1;
+  const k = Math.floor(Math.min(sw * dpr / W, sh * dpr / H));
+  let cw = k >= 1 ? k * W / dpr : Math.min(sw, sh * W / H);
+  const ch = cw * H / W;
+  cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
+  Object.assign(ov.style, { left: (sw - cw) / 2 + 'px', top: (sh - ch) / 2 + 'px', width: cw + 'px', height: ch + 'px' });
+  ov.style.setProperty('--fs', Math.max(11, Math.round(cw / 44)) + 'px');
+  lastKey = '';
+}
+window.addEventListener('resize', resize);
+
+/* ---------- 控件 ---------- */
+const chapsEl = $('chaps'), marks = $('tlmarks');
+CH.forEach((c, i) => {
+  const b = document.createElement('button');
+  b.innerHTML = `<b>${fmtClock(c.c0)}</b>${c.name}`;
+  b.onclick = () => { t = c.t0 + .5; lastKey = ""; };
+  chapsEl.appendChild(b); c.btn = b;
+  if (i) { const m = document.createElement('i'); m.style.left = c.t0 / TOTAL * 100 + '%'; marks.appendChild(m); }
+});
+function setPlaying(p) { playing = p; $('play').textContent = p ? '❚❚' : '▶'; }
+function setSpeed(s) { speed = s; for (const b of $('speed').children) b.classList.toggle('on', +b.dataset.s === s); }
+function enableSound() { AU.init(); if (AU.ctx) { AU.setMuted(false); $('mute').textContent = '♪ 开'; $('mute').classList.add('on'); } $('hint').style.display = 'none'; }
+function toggleMute() { if (!AU.ctx || AU.muted) enableSound(); else { AU.setMuted(true); $('mute').textContent = '♪ 关'; $('mute').classList.remove('on'); } }
+$('play').onclick = () => setPlaying(!playing);
+for (const b of $('speed').children) b.onclick = () => setSpeed(+b.dataset.s);
+$('mute').onclick = toggleMute;
+function seekFrom(e) { const r = tl.getBoundingClientRect(); t = clamp((e.clientX - r.left) / r.width, 0, .99999) * TOTAL; lastKey = ''; }
+tl.addEventListener('pointerdown', e => { dragging = true; tl.setPointerCapture(e.pointerId); seekFrom(e); });
+tl.addEventListener('pointermove', e => { if (dragging) seekFrom(e); });
+const endDrag = () => { dragging = false; };
+tl.addEventListener('pointerup', endDrag); tl.addEventListener('pointercancel', endDrag);
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); setPlaying(!playing); }
+  else if (e.key >= '1' && e.key <= '3') setSpeed(+e.key);
+  else if (e.key === 'm' || e.key === 'M') toggleMute();
+  else if (e.key === 'ArrowRight') { t = Math.min(TOTAL - .001, t + 5); lastKey = ''; }
+  else if (e.key === 'ArrowLeft') { t = Math.max(0, t - 5); lastKey = ''; }
+});
+// 点击画面：第一次开启声音；点中彩蛋触发互动
+cv.addEventListener('pointerdown', e => {
+  if (!AU.started) { AU.started = true; enableSound(); }
+  const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+  const c = CH[chapterIndex(t)], lt = t - c.t0;
+  const hit = c.hits(lt).find(h => x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h);
+  if (!hit) return;
+  const pop = s => { FX.pop = { x: hit.x + hit.w / 2, y: hit.y - 2, s, cls: '', until: RT + 1.3 }; lastKey = ''; };
+  if (hit.id === 'cat') { FX.meow = RT; AU.play('meow'); pop(['喵～', '喵？', '喵喵！'][Math.floor(Math.random() * 3)]); }
+  else if (hit.id === 'clock') { FX.snooze = RT; AU.play('snooze'); pop('再贪睡一次？'); }
+  else if (hit.id === 'coffee' || hit.id === 'mug') { FX.refill = RT; FX.extra++; AU.play('coffee'); pop('续杯 +1'); }
+  else if (hit.id === 'bot') { FX.bot = RT; AU.play('bot'); }
+});
+
+/* ---------- 主循环：时间推进与帧率无关 ---------- */
+let lastChap = -1, lastTxt = '';
+function frame(now) {
+  const dt = Math.min(.1, Math.max(0, (now - last) / 1000)); last = now; RT += dt;
+  if (playing && !dragging) {
+    const nt = t + dt * speed;
+    if (nt >= TOTAL) { fireEvents(t, TOTAL); t = nt - TOTAL; day++; fireEvents(0, t); lastKey = ''; }
+    else { fireEvents(t, nt); t = nt; }
+  }
+  render();
+  updateBubbles();
+  const i = chapterIndex(t), c = CH[i];
+  AU.tick(c.moodAt ? c.moodAt(t - c.t0) : c.mood, playing && !dragging ? speed : 0, typingAt(t) && playing && !dragging);
+  const f = t / TOTAL * 100 + '%';
+  $('tlfill').style.width = f; $('tlknob').style.left = f;
+  const txt = fmtClock(clockAt(t)); if (txt !== lastTxt) { $('time').textContent = txt; lastTxt = txt; }
+  if (i !== lastChap) {
+    if (lastChap >= 0) CH[lastChap].btn.classList.remove('on');
+    c.btn.classList.add('on'); lastChap = i;
+    chapsEl.scrollTo({ left: c.btn.offsetLeft - chapsEl.clientWidth / 2 + c.btn.offsetWidth / 2, behavior: 'smooth' });
+  }
+  requestAnimationFrame(frame);
+}
+resize();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

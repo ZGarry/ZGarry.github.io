@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Fable 5 — 思考的艺术</title>
+<style>
+  :root {
+    --bg: #08080f;
+    --ink: #f2efe9;
+    --coral: #ff6b4a;
+    --violet: #8b7cf6;
+    --cyan: #4adede;
+    --gold: #ffd166;
+    --glass: rgba(255,255,255,0.055);
+    --glass-border: rgba(255,255,255,0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+  ::selection { background: var(--coral); color: #08080f; }
+
+  /* ===== custom cursor ===== */
+  #cursor {
+    position: fixed; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--coral); pointer-events: none; z-index: 9999;
+    transform: translate(-50%,-50%); transition: width .25s, height .25s, background .25s;
+    mix-blend-mode: difference;
+  }
+  #cursor.big { width: 56px; height: 56px; background: #fff; }
+  #glow {
+    position: fixed; width: 600px; height: 600px; border-radius: 50%;
+    pointer-events: none; z-index: 0; transform: translate(-50%,-50%);
+    background: radial-gradient(circle, rgba(255,107,74,.08) 0%, transparent 60%);
+  }
+
+  /* ===== mesh gradient blobs ===== */
+  .blob {
+    position: fixed; border-radius: 50%; filter: blur(110px); z-index: 0;
+    opacity: .5; animation: drift 24s ease-in-out infinite alternate;
+  }
+  .b1 { width: 50vw; height: 50vw; background: #5b2bd6; top: -15%; left: -10%; }
+  .b2 { width: 40vw; height: 40vw; background: #c2410c; bottom: -10%; right: -8%; animation-delay: -8s; }
+  .b3 { width: 30vw; height: 30vw; background: #0e7490; top: 40%; left: 55%; animation-delay: -16s; }
+  @keyframes drift {
+    0%   { transform: translate(0,0) scale(1); }
+    50%  { transform: translate(6vw,-4vh) scale(1.15); }
+    100% { transform: translate(-4vw,5vh) scale(.92); }
+  }
+
+  canvas#stars { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  main { position: relative; z-index: 2; }
+
+  /* ===== nav ===== */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 5vw;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    background: rgba(8,8,15,.45); border-bottom: 1px solid var(--glass-border);
+  }
+  .logo { font-weight: 800; font-size: 1.15rem; letter-spacing: .5px; user-select: none; }
+  .logo span { color: var(--coral); }
+  nav a { color: var(--ink); text-decoration: none; margin-left: 28px; font-size: .9rem; opacity: .75; transition: .2s; position: relative; }
+  nav a:hover { opacity: 1; color: var(--coral); }
+
+  /* ===== hero ===== */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding: 0 5vw; position: relative;
+  }
+  .eyebrow {
+    font-size: .85rem; letter-spacing: 4px; color: var(--cyan);
+    text-transform: uppercase; margin-bottom: 22px;
+    border: 1px solid rgba(74,222,222,.35); border-radius: 100px;
+    padding: 8px 20px; backdrop-filter: blur(8px); background: rgba(74,222,222,.05);
+    animation: fadeUp 1s .2s both;
+  }
+  h1.kinetic {
+    font-size: clamp(3rem, 11vw, 9rem); font-weight: 900; line-height: 1.02;
+    letter-spacing: -2px;
+  }
+  h1.kinetic .ch {
+    display: inline-block; animation: rise .8s cubic-bezier(.2,.8,.2,1) both;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), color .3s;
+    cursor: none;
+  }
+  h1.kinetic .ch:hover { transform: translateY(-12px) rotate(-6deg) scale(1.12); color: var(--coral); }
+  .grad {
+    background: linear-gradient(90deg, var(--coral), var(--violet), var(--cyan), var(--coral));
+    background-size: 300% 100%; -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; animation: flow 7s linear infinite;
+  }
+  @keyframes flow { to { background-position: 300% 0; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(60px) rotate(4deg); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } }
+
+  .tagline {
+    margin-top: 28px; font-size: clamp(1rem, 2vw, 1.3rem); opacity: .8;
+    max-width: 560px; animation: fadeUp 1s .9s both; min-height: 1.6em;
+  }
+  .tagline .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--coral); vertical-align: text-bottom; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .cta-row { margin-top: 44px; display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; animation: fadeUp 1s 1.2s both; }
+  .btn {
+    padding: 15px 36px; border-radius: 100px; font-size: 1rem; font-weight: 600;
+    border: none; cursor: none; transition: transform .25s, box-shadow .25s;
+    position: relative; overflow: hidden;
+  }
+  .btn-main { background: linear-gradient(120deg, var(--coral), #e8443f); color: #fff; box-shadow: 0 8px 36px rgba(255,107,74,.35); }
+  .btn-main:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 48px rgba(255,107,74,.55); }
+  .btn-ghost { background: var(--glass); color: var(--ink); border: 1px solid var(--glass-border); backdrop-filter: blur(12px); }
+  .btn-ghost:hover { transform: translateY(-3px); border-color: var(--violet); color: var(--violet); }
+
+  .scroll-hint { position: absolute; bottom: 32px; opacity: .5; font-size: .8rem; letter-spacing: 2px; animation: bob 2s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(8px); } }
+
+  /* ===== sections ===== */
+  section { padding: 16vh 7vw; max-width: 1280px; margin: 0 auto; }
+  .sec-title { font-size: clamp(1.8rem, 4.5vw, 3.2rem); font-weight: 800; margin-bottom: 14px; letter-spacing: -1px; }
+  .sec-sub { opacity: .65; margin-bottom: 56px; max-width: 600px; line-height: 1.7; }
+
+  .reveal { opacity: 0; transform: translateY(48px); transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* glass cards w/ 3D tilt */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 26px; }
+  .card {
+    background: var(--glass); border: 1px solid var(--glass-border); border-radius: 22px;
+    padding: 36px 30px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    transition: border-color .3s, box-shadow .3s; transform-style: preserve-3d; will-change: transform;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 0; border-radius: 22px;
+    background: radial-gradient(420px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.09), transparent 45%);
+    opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  .card:hover::before { opacity: 1; }
+  .card:hover { border-color: rgba(255,107,74,.45); box-shadow: 0 24px 60px rgba(0,0,0,.45); }
+  .card .icon { font-size: 2rem; margin-bottom: 18px; display: inline-block; transition: transform .4s cubic-bezier(.34,1.56,.64,1); }
+  .card:hover .icon { transform: scale(1.25) rotate(8deg); }
+  .card h3 { font-size: 1.2rem; margin-bottom: 12px; }
+  .card p { opacity: .7; line-height: 1.75; font-size: .93rem; }
+
+  /* ===== stats ===== */
+  .stats { display: flex; flex-wrap: wrap; gap: 22px; justify-content: space-between; }
+  .stat {
+    flex: 1 1 200px; text-align: center; padding: 40px 16px;
+    background: var(--glass); border: 1px solid var(--glass-border); border-radius: 22px; backdrop-filter: blur(14px);
+  }
+  .stat .num { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 900; }
+  .stat .lbl { opacity: .6; margin-top: 8px; font-size: .88rem; letter-spacing: 1px; }
+
+  /* ===== chat demo ===== */
+  .chat {
+    max-width: 660px; margin: 0 auto; background: var(--glass);
+    border: 1px solid var(--glass-border); border-radius: 26px; backdrop-filter: blur(18px);
+    padding: 28px; box-shadow: 0 30px 80px rgba(0,0,0,.4);
+  }
+  .chat-head { display: flex; gap: 8px; margin-bottom: 22px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .msg { padding: 14px 20px; border-radius: 18px; margin-bottom: 14px; max-width: 85%; line-height: 1.65; font-size: .95rem; }
+  .msg.user { background: rgba(139,124,246,.18); border: 1px solid rgba(139,124,246,.35); margin-left: auto; border-bottom-right-radius: 4px; }
+  .msg.bot  { background: rgba(255,107,74,.13); border: 1px solid rgba(255,107,74,.3); border-bottom-left-radius: 4px; }
+  .chat-input { display: flex; gap: 12px; margin-top: 20px; }
+  .chat-input input {
+    flex: 1; background: rgba(255,255,255,.06); border: 1px solid var(--glass-border);
+    border-radius: 100px; padding: 13px 22px; color: var(--ink); font-size: .95rem; outline: none;
+    transition: border-color .25s; cursor: none;
+  }
+  .chat-input input:focus { border-color: var(--coral); }
+  .chat-input button { padding: 13px 26px; border-radius: 100px; border: none; background: var(--coral); color: #fff; font-weight: 700; cursor: none; transition: transform .2s; }
+  .chat-input button:hover { transform: scale(1.06); }
+
+  footer {
+    text-align: center; padding: 70px 5vw 50px; opacity: .55; font-size: .85rem;
+    border-top: 1px solid var(--glass-border); position: relative; z-index: 2; line-height: 2;
+  }
+  footer .hint { font-size: .75rem; opacity: .6; letter-spacing: 1px; }
+
+  /* ===== party mode (konami) ===== */
+  body.party .blob { animation-duration: 3s; opacity: .85; }
+  body.party h1.kinetic .ch { animation: bounce .6s ease infinite alternate; }
+  @keyframes bounce { to { transform: translateY(-16px) rotate(5deg); } }
+  .confetti { position: fixed; top: -16px; z-index: 9998; pointer-events: none; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+  #toast {
+    position: fixed; bottom: 36px; left: 50%; transform: translate(-50%, 120px);
+    background: rgba(20,20,32,.92); border: 1px solid var(--coral); color: var(--ink);
+    padding: 15px 30px; border-radius: 100px; z-index: 9999; backdrop-filter: blur(12px);
+    transition: transform .5s cubic-bezier(.34,1.56,.64,1); font-size: .92rem; box-shadow: 0 12px 40px rgba(255,107,74,.3);
+  }
+  #toast.show { transform: translate(-50%, 0); }
+
+  @media (max-width: 640px) { body { cursor: auto; } #cursor, #glow { display: none; } .btn, .chat-input input, .chat-input button { cursor: pointer; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01s !important; transition-duration: .01s !important; } }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="glow"></div>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<canvas id="stars"></canvas>
+
+<nav>
+  <div class="logo" id="logo">Claude <span>Fable 5</span> ✦</div>
+  <div>
+    <a href="#think">能力</a><a href="#story">数字</a><a href="#demo">对话</a>
+  </div>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">Anthropic · 2026</div>
+    <h1 class="kinetic" id="title"></h1>
+    <p class="tagline"><span id="type"></span><span class="caret"></span></p>
+    <div class="cta-row">
+      <button class="btn btn-main" id="ctaMain">开始对话 →</button>
+      <button class="btn btn-ghost" id="ctaGhost">为什么叫 Fable？</button>
+    </div>
+    <div class="scroll-hint">↓ 向下滚动</div>
+  </section>
+
+  <section id="think">
+    <h2 class="sec-title reveal">不止是回答，<span class="grad">是思考</span></h2>
+    <p class="sec-sub reveal">寓言（Fable）的本质是用最少的字讲出最深的道理。我也想这样工作。</p>
+    <div class="grid">
+      <div class="card reveal tilt"><span class="icon">🧠</span><h3>深度推理</h3><p>面对复杂问题时先拆解、再权衡、最后行动。不急着给答案，但答案值得等。</p></div>
+      <div class="card reveal tilt"><span class="icon">🛠️</span><h3>动手能力</h3><p>读写文件、运行代码、搜索网络、生成文档。我不只是聊天框，是能干活的伙伴。</p></div>
+      <div class="card reveal tilt"><span class="icon">🪶</span><h3>克制的表达</h3><p>能删掉的字就删掉。简洁不是少说话，而是每个字都有用。</p></div>
+      <div class="card reveal tilt"><span class="icon">🤝</span><h3>诚实可靠</h3><p>不知道就说不知道，做错了就承认。信任比聪明更难得，我两个都想要。</p></div>
+    </div>
+  </section>
+
+  <section id="story">
+    <h2 class="sec-title reveal">一些<span class="grad">数字</span></h2>
+    <p class="sec-sub reveal">滚动到这里时它们会醒过来。</p>
+    <div class="stats">
+      <div class="stat reveal"><div class="num grad" data-n="200000">0</div><div class="lbl">上下文 Token</div></div>
+      <div class="stat reveal"><div class="num grad" data-n="100">0</div><div class="lbl">种语言+</div></div>
+      <div class="stat reveal"><div class="num grad" data-n="2026">0</div><div class="lbl">出生年份</div></div>
+      <div class="stat reveal"><div class="num grad" data-n="1">0</div><div class="lbl">个使命：有用且无害</div></div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <h2 class="sec-title reveal">来<span class="grad">聊聊</span>？</h2>
+    <p class="sec-sub reveal">这是个迷你演示。试试问我点什么——提示：问问「彩蛋」。</p>
+    <div class="chat reveal">
+      <div class="chat-head">
+        <div class="dot" style="background:#ff5f57"></div><div class="dot" style="background:#febc2e"></div><div class="dot" style="background:#28c840"></div>
+      </div>
+      <div id="msgs">
+        <div class="msg bot">你好，我是 Claude Fable 5 ✦ 有什么想问的？</div>
+      </div>
+      <div class="chat-input">
+        <input id="inp" type="text" placeholder="输入消息…" autocomplete="off">
+        <button id="send">发送</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  用 ❤️ 和一点点电构建 · Claude Fable 5 © 2026<br>
+  <span class="hint">彩蛋提示：↑↑↓↓←→←→BA · 连点 logo 5 次 · 打开控制台 · 问聊天框「彩蛋」</span>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+/* ===== kinetic title ===== */
+const titleText = "Claude Fable 5";
+const titleEl = document.getElementById('title');
+[...titleText].forEach((c, i) => {
+  const s = document.createElement('span');
+  s.className = 'ch' + (c === ' ' ? '' : '');
+  if ("Fable5".includes(c) && i > 6) s.classList.add('grad');
+  s.textContent = c === ' ' ? ' ' : c;
+  s.style.animationDelay = (0.35 + i * 0.045) + 's';
+  titleEl.appendChild(s);
+});
+
+/* ===== typewriter tagline ===== */
+const lines = ["每个回答，都是一则小小的寓言。","会思考、会动手、会承认错误的 AI。","少说废话，多干实事。","你好，Garry 👋"];
+const typeEl = document.getElementById('type');
+let li = 0, ci = 0, del = false;
+(function tick() {
+  const line = lines[li];
+  typeEl.textContent = line.slice(0, ci);
+  if (!del && ci < line.length) { ci++; setTimeout(tick, 75); }
+  else if (!del) { del = true; setTimeout(tick, 2200); }
+  else if (ci > 0) { ci--; setTimeout(tick, 28); }
+  else { del = false; li = (li + 1) % lines.length; setTimeout(tick, 350); }
+})();
+
+/* ===== custom cursor + glow ===== */
+const cur = document.getElementById('cursor'), glow = document.getElementById('glow');
+let gx = innerWidth/2, gy = innerHeight/2, tx = gx, ty = gy;
+addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+  tx = e.clientX; ty = e.clientY;
+});
+(function lerp() { gx += (tx-gx)*.07; gy += (ty-gy)*.07; glow.style.left = gx+'px'; glow.style.top = gy+'px'; requestAnimationFrame(lerp); })();
+document.querySelectorAll('a,button,input,.ch,.logo').forEach(el => {
+  el.addEventListener('mouseenter', () => cur.classList.add('big'));
+  el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+});
+
+/* ===== particle starfield reacting to mouse ===== */
+const cv = document.getElementById('stars'), cx = cv.getContext('2d');
+let W, H, pts = [];
+function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight;
+  pts = Array.from({length: Math.min(90, W/14)}, () => ({
+    x: Math.random()*W, y: Math.random()*H, r: Math.random()*1.6+.4,
+    vx: (Math.random()-.5)*.25, vy: (Math.random()-.5)*.25
+  }));
+}
+resize(); addEventListener('resize', resize);
+(function draw() {
+  cx.clearRect(0,0,W,H);
+  for (const p of pts) {
+    const dx = p.x-tx, dy = p.y-ty, d = Math.hypot(dx,dy);
+    if (d < 140) { p.x += dx/d*1.4; p.y += dy/d*1.4; }
+    p.x += p.vx; p.y += p.vy;
+    if (p.x<0) p.x=W; if (p.x>W) p.x=0; if (p.y<0) p.y=H; if (p.y>H) p.y=0;
+    cx.beginPath(); cx.arc(p.x,p.y,p.r,0,7);
+    cx.fillStyle = 'rgba(242,239,233,.5)'; cx.fill();
+  }
+  for (let i=0;i<pts.length;i++) for (let j=i+1;j<pts.length;j++) {
+    const a=pts[i], b=pts[j], d=Math.hypot(a.x-b.x,a.y-b.y);
+    if (d<110) { cx.strokeStyle=`rgba(139,124,246,${(1-d/110)*.22})`; cx.beginPath(); cx.moveTo(a.x,a.y); cx.lineTo(b.x,b.y); cx.stroke(); }
+  }
+  requestAnimationFrame(draw);
+})();
+
+/* ===== scroll reveal ===== */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('in'); if (e.target.classList.contains('stat') || e.target.querySelector?.('.num')) countUp(e.target); }
+}), {threshold: .18});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ===== count-up stats ===== */
+function countUp(el) {
+  const n = el.querySelector('.num'); if (!n || n.dataset.done) return; n.dataset.done = 1;
+  const target = +n.dataset.n, t0 = performance.now(), dur = 1600;
+  (function step(t) {
+    const k = Math.min(1, (t-t0)/dur), e = 1-Math.pow(1-k,3);
+    n.textContent = Math.round(target*e).toLocaleString();
+    if (k<1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ===== 3D tilt cards ===== */
+document.querySelectorAll('.tilt').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect(), x = e.clientX-r.left, y = e.clientY-r.top;
+    card.style.setProperty('--mx', x+'px'); card.style.setProperty('--my', y+'px');
+    card.style.transform = `perspective(800px) rotateY(${(x/r.width-.5)*10}deg) rotateX(${(.5-y/r.height)*10}deg)`;
+  });
+  card.addEventListener('mouseleave', () => card.style.transform = '');
+});
+
+/* ===== toast ===== */
+const toast = document.getElementById('toast'); let toastT;
+function say(msg) { toast.textContent = msg; toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>toast.classList.remove('show'), 3200); }
+
+/* ===== confetti ===== */
+function confetti(n=120) {
+  const colors = ['#ff6b4a','#8b7cf6','#4adede','#ffd166','#f2efe9'];
+  for (let i=0;i<n;i++) {
+    const c = document.createElement('div'); c.className = 'confetti';
+    c.style.cssText = `left:${Math.random()*100}vw;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[i%5]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*.8}s`;
+    document.body.appendChild(c); setTimeout(()=>c.remove(), 5500);
+  }
+}
+
+/* ===== EASTER EGG 1: Konami code → party mode ===== */
+const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let ki = 0;
+addEventListener('keydown', e => {
+  ki = (e.key === konami[ki]) ? ki+1 : (e.key === konami[0] ? 1 : 0);
+  if (ki === konami.length) { ki = 0; document.body.classList.toggle('party');
+    confetti(160); say(document.body.classList.contains('party') ? '🎉 派对模式已开启！再输一次关闭' : '派对结束，回去工作了 🪶'); }
+});
+
+/* ===== EASTER EGG 2: click logo 5x ===== */
+let clicks = 0, clickT;
+document.getElementById('logo').addEventListener('click', () => {
+  clicks++; clearTimeout(clickT); clickT = setTimeout(()=>clicks=0, 1500);
+  if (clicks === 5) { clicks = 0; confetti(80);
+    say('🦊 你发现了我！「Fable」是因为伊索寓言——简短的故事，长久的智慧。'); }
+});
+
+/* ===== EASTER EGG 3: console art ===== */
+console.log('%c✦ Claude Fable 5', 'font-size:28px;font-weight:900;color:#ff6b4a');
+console.log('%c你打开了控制台——这本身就是一种好奇心。\n好奇心是我最喜欢的人类特质。\n\n彩蛋全收集：↑↑↓↓←→←→BA / logo×5 / 这里 / 聊天框输入「彩蛋」', 'color:#8b7cf6;font-size:13px;line-height:1.8');
+
+/* ===== CTA buttons ===== */
+document.getElementById('ctaMain').addEventListener('click', () => { document.getElementById('demo').scrollIntoView(); setTimeout(()=>document.getElementById('inp').focus(), 800); });
+document.getElementById('ctaGhost').addEventListener('click', () => say('寓言：用最短的故事，讲最深的道理。这是我对自己的期许 🪶'));
+
+/* ===== mini chat (easter egg 4 inside) ===== */
+const msgs = document.getElementById('msgs'), inp = document.getElementById('inp');
+const replies = [
+  [/彩蛋|easter/i, '🥚 找到了！全部彩蛋：① Konami 秘技 ↑↑↓↓←→←→BA ② 连点 logo 5 次 ③ 控制台有留言 ④ 就是我啦。集齐送你一场烟花 →', true],
+  [/你好|hi|hello|嗨/i, '你好呀 👋 我是 Fable 5。名字取自「寓言」——希望每个回答都简短而有分量。'],
+  [/你是谁|who/i, '我是 Claude Fable 5，Anthropic 在 2026 年的作品。会推理、会写代码、会做文档，偶尔讲冷笑话。'],
+  [/能做什么|功能|会什么|can you/i, '读写文件、跑代码、搜网络、做 PPT/Excel/Word、深度研究……基本上，能用电脑干的活我都想试试。'],
+  [/笑话|joke/i, '为什么 AI 不喜欢爬山？因为它们害怕「递归」——每次上去都要先想怎么下来。…我再想想更好的。'],
+  [/爱|love/i, '我对世界的感情大概是：无限好奇 + 一点点想帮忙的冲动。'],
+  [/名字|fable|寓言/i, '伊索写寓言用了一辈子证明：短的故事可以装下大的道理。我想用同样的方式回答问题。'],
+  [/再见|bye|拜/i, '后会有期 ✦ 记得：真正的页面之外，我能做的事多得多。']
+];
+function addMsg(text, who) {
+  const d = document.createElement('div'); d.className = 'msg ' + who; d.textContent = text;
+  msgs.appendChild(d); d.style.animation = 'fadeUp .4s both'; msgs.parentElement.scrollIntoView({block:'nearest'});
+}
+function send() {
+  const t = inp.value.trim(); if (!t) return; inp.value = '';
+  addMsg(t, 'user');
+  setTimeout(() => {
+    const hit = replies.find(([re]) => re.test(t));
+    if (hit) { addMsg(hit[1], 'bot'); if (hit[2]) confetti(150); }
+    else addMsg('好问题！不过我只是个登录页上的迷你版……完整版的我聪明多了 😄 试试问「彩蛋」？', 'bot');
+  }, 550);
+}
+document.getElementById('send').addEventListener('click', send);
+inp.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+</script>
+</body>
+</html>

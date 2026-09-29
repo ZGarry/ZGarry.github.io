@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aha demos</title>
+<meta name="description" content="同一类题目，隔一代模型再做一次：Claude Fable 5 与 Opus 5.5 做的可玩网页 demo。">
+<style>
+  :root {
+    --bg: #0e0f12; --panel: #16181d; --panel-2: #1c1f26; --line: #2a2e37;
+    --text: #e8e6e1; --muted: #9a9890; --faint: #6d6b65;
+    --accent: #e8a45c; --accent-2: #7fb3a8; --ok: #8cc084; --warn: #d9b25f; --bad: #d97a6c;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.65 -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  header { padding: 72px 0 40px; border-bottom: 1px solid var(--line); }
+  .kicker { color: var(--accent); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.1; margin: 10px 0 18px; font-weight: 700; letter-spacing: -.01em; }
+  .lede { max-width: 660px; color: var(--muted); font-size: 16px; margin: 0; }
+  .stats { display: flex; flex-wrap: wrap; gap: 28px; margin-top: 32px; }
+  .stat b { display: block; font-size: 26px; font-weight: 600; color: var(--text); }
+  .stat span { color: var(--faint); font-size: 13px; }
+
+  section { padding: 48px 0 8px; }
+  .round-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; margin-bottom: 6px; }
+  .round-head h2 { margin: 0; font-size: 24px; font-weight: 650; }
+  .round-head .when { color: var(--faint); font-size: 14px; }
+  .round-note { color: var(--muted); margin: 0 0 24px; max-width: 760px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px 20px 16px; display: flex; flex-direction: column; min-width: 0;
+  }
+  .card.feature { grid-column: 1 / -1; background: linear-gradient(135deg, #1b1a16, var(--panel) 60%); border-color: #3a3326; }
+  .card h3 { margin: 0 0 2px; font-size: 19px; font-weight: 650; }
+  .card .sub { color: var(--faint); font-size: 13px; margin-bottom: 10px; }
+  .card p { margin: 0 0 12px; color: var(--muted); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tag { font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .tag.ok { color: var(--ok); border-color: #3a4f37; }
+  .tag.warn { color: var(--warn); border-color: #52462a; }
+  .tag.bad { color: var(--bad); border-color: #553530; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 4px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 14px;
+    padding: 7px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+  }
+  .btn:hover { border-color: #444a56; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #1a1208; font-weight: 600; }
+  .btn.primary:hover { filter: brightness(1.06); }
+
+  details { margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 10px; }
+  summary { cursor: pointer; color: var(--accent-2); font-size: 14px; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸ "; }
+  details[open] summary::before { content: "▾ "; }
+  pre {
+    white-space: pre-wrap; word-break: break-word; margin: 10px 0 0; padding: 12px 14px;
+    background: #0b0c0f; border: 1px solid var(--line); border-radius: 8px;
+    font: 13px/1.6 ui-monospace, "Cascadia Mono", Consolas, monospace; color: #d6d3cc;
+    max-height: 360px; overflow: auto;
+  }
+  .prov { color: var(--faint); font-size: 12.5px; margin-top: 8px; }
+  ul.facts { margin: 0 0 12px; padding-left: 18px; color: var(--muted); }
+  ul.facts li { margin: 2px 0; }
+
+  footer { margin-top: 56px; padding: 28px 0 48px; border-top: 1px solid var(--line); color: var(--faint); font-size: 13px; }
+  footer p { margin: 4px 0; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: .92em; color: #d6d3cc; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="kicker">aha demos</div>
+    <h1>同一类题目，<br>隔一代模型再做一次</h1>
+    <p class="lede">这里收着几个让我"原来 AI 能做到这个"的网页 demo：2026 年 6 月由 Claude Fable 5 做的五个，以及 9 月由 Claude Opus 5.5 做的一个。全部是纯前端，点开就能玩，不需要安装，也不联网。</p>
+    <div class="stats">
+      <div class="stat"><b>6</b><span>个可玩 demo</span></div>
+      <div class="stat"><b>2</b><span>代模型</span></div>
+      <div class="stat"><b>0</b><span>外部依赖</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section id="opus-5-5">
+  <div class="round-head"><h2>Claude Opus 5.5</h2><span class="when">2026-09</span></div>
+  <p class="round-note">这一轮的提示词是完整保存的原文，用来和 6 月那一轮做对比。</p>
+  <div class="grid">
+    <article class="card feature">
+      <h3>程序员的一天</h3>
+      <div class="sub">像素风交互动画 · 单文件 77KB</div>
+      <p>约 2 分钟走完一个工作日：闹钟、通勤、站会、心流、线上告警、和 AI 助手一起抓 bug、部署、被产品经理拦下、深夜灵光一现。</p>
+      <ul class="facts">
+        <li>49 分钟做完，中间没有等人确认：21 分钟规划，13 分钟写完 10 个文件，然后自己开浏览器逐场景截图自查。</li>
+        <li>上午写下的 <code>if (user.role = "admin")</code>，就是下午 AI 揪出来的那个 bug，git blame 显示"你，上午 11:00"。</li>
+        <li>彩蛋：点猫会叫、点闹钟会贪睡、点咖啡机能续杯、点 AI 机器人会打招呼，代码屏上是一段真的 FizzBuzz。</li>
+      </ul>
+      <div class="tags"><span class="tag ok">提示词：原文</span><span class="tag">空格暂停 · 1–3 倍速 · 可拖时间轴</span><span class="tag">点击画面后有 8-bit 音乐</span></div>
+      <div class="actions">
+        <a class="btn primary" href="demos/programmer-day/index.html">打开 ▸</a>
+        <a class="btn" href="downloads/programmer-day.zip">下载</a>
+        <a class="btn" href="prompts/programmer-day.md">提示词文件</a>
+      </div>
+      <details>
+        <summary>查看提示词</summary>
+        <pre>请做一个单文件 HTML 像素风动画：《程序员的一天》。
+
+## 体验目标
+打开就开始播放，约 2 分钟走完一个完整工作日（早 7 点到深夜），像一部可以交互的像素短片。看完的感受应该是：好笑、真实、有点温暖——做过程序员的人会在好几个地方会心一笑。
+
+## 硬性要求
+- 只交付一个 index.html，双击即可离线运行：不引用任何外部图片、字体、库或 CDN。
+- 所有像素美术都用代码绘制：在固定的低分辨率画布上画（例如 320×180），再按整数倍放大铺满窗口，关闭插值（image-rendering: pixelated），保证像素锐利。全片使用一套统一的 16～32 色调色板。
+- 用 requestAnimationFrame 驱动，时间推进与帧率无关；全程流畅，控制台不能有任何报错。
+- 窗口缩放、手机竖屏都能正常显示。
+
+## 剧情（按时间推进，场景之间要有转场）
+1. 07:00 闹钟响，按了三次贪睡，窗外天色从深蓝慢慢变亮。
+2. 08:30 通勤：地铁车厢里，窗外的城市剪影向后滚动。
+3. 09:30 到工位：开电脑、泡咖啡（杯子冒热气）；站会上每个人都说"没有阻塞"。
+4. 10:30 写代码进入心流：屏幕上代码滚动、光标闪烁，键盘声有节奏。
+5. 12:00 午饭。
+6. 14:00 下午犯困，突然线上告警：屏幕变红，同事围过来，开始排查。
+7. 15:30 和 AI 搭档一起排查：屏幕角落有一个小小的像素 AI 助手，程序员把任务交给它，它分出几个小分身并行跑测试，最后揪出那个少写了一个等号的 bug。
+8. 17:00 CI 由红变绿，部署成功，全组小声欢呼。
+9. 19:00 准备下班，被产品经理拦住："就改一个小地方。"
+10. 23:00 深夜，城市灯火。程序员躺在床上突然想到一个更好的写法，睁开眼——画面循环回到第二天早上。
+
+## 细节（质量的分水岭在这里）
+- 人物有完整的动作帧：走路、打字、喝咖啡、伸懒腰、抓头发、捂脸。
+- 环境随时间变化：光线色温、窗外天气（可以随机下一场雨）、显示器的光映在脸上、咖啡杯慢慢变空。
+- 顶部一条状态栏：时钟、精力、咖啡杯数、提交次数、bug 数，随剧情变化。
+- 至少藏 3 个彩蛋，比如点击猫会叫、点击咖啡机能续杯、代码屏上能认出一段真实代码。
+
+## 交互
+- 空格暂停/继续，1～3 档倍速；底部时间轴可以拖动跳到任意时刻，也可以点章节名直接跳转。
+- 声音：用户点击画面后，用 WebAudio 实时合成 8-bit 背景音乐和音效（闹钟、键盘、咖啡机、告警、部署成功），带静音按钮。用户点击之前保持静音。
+
+## 交付前自查
+完成后逐条自查：每个场景都能看到；拖动时间轴不会错乱；连续播放两遍没有卡顿或内存增长；文字没有溢出；没有任何外部请求。在回复里写出自查结果，以及你最得意的三个细节。
+
+做完后用浏览器打开 index.html，自己截图检查每个场景，发现问题就改，直到满意为止。</pre>
+      </details>
+    </article>
+  </div>
+</section>
+
+<section id="fable-5">
+  <div class="round-head"><h2>Claude Fable 5</h2><span class="when">2026-06</span></div>
+  <p class="round-note">6 月陆续做出来的五个 demo。原来的展示站 7 月下线过，这一版是 9 月从 Git 历史里原样恢复的，文件大小与原件一致。原始对话没有保留下来，所以部分提示词是按成品反推的，每条都标明了来源。</p>
+  <div class="grid">
+
+    <article class="card">
+      <h3>巴别图书馆</h3>
+      <div class="sub">3D 可探索图书馆 · 单文件 660KB</div>
+      <p>按博尔赫斯的描述 1:1 复刻的六边形回廊。可以从书架上取书翻阅，也可以输入一段文字，直接前往"包含这段文字的那本书"所在的位置。</p>
+      <div class="tags"><span class="tag ok">提示词：原文</span><span class="tag">WASD + 鼠标</span></div>
+      <div class="actions">
+        <a class="btn primary" href="demos/babel-library/index.html">打开 ▸</a>
+        <a class="btn" href="downloads/babel-library.zip">下载</a>
+        <a class="btn" href="prompts/babel-library.md">提示词文件</a>
+      </div>
+      <details>
+        <summary>查看提示词</summary>
+        <pre>我刚读了博尔赫斯的《巴别图书馆》（The Library of Babel），对里面的图书馆世界非常有兴趣。我要最直观体验，你先仔细读完《巴别图书馆》，然后端到端规划并制作一款可以在浏览器中游玩的3D游戏。这款游戏里，玩家将被置身于一个完全基于博尔赫斯描述打造的、完全精确1:1复刻的图书馆里。玩家可以做的事：能够从书架上取下书籍，并进行查看，并且可以要求直接前往，包含某段特定文本的位置，以及探索其周围的环境。后续要求：游戏必须能在浏览器里直接玩。你先定个计划，然后执行循环指令，不停执行，一直到开发完成。然后你必须从头到尾完整测试并通关该游戏，并确保游戏品质精良，最后确保所有内容都通过你的验证。</pre>
+      </details>
+    </article>
+
+    <article class="card">
+      <h3>永恒落日 · 我的世界</h3>
+      <div class="sub">three.js 体素世界 · 单文件 546KB</div>
+      <p>出生在高空自动滑翔，俯瞰海岸与丘陵后落地步行；可以挖、放方块，合成，有生存模式和自动存档。完成任务线"点亮永恒黄昏"即通关。</p>
+      <div class="tags"><span class="tag warn">提示词：前半句推测，后缀原文</span><span class="tag">WASD · 鼠标 · E 背包 · F 起飞</span></div>
+      <div class="actions">
+        <a class="btn primary" href="demos/voxel-sunset/index.html">打开 ▸</a>
+        <a class="btn" href="downloads/voxel-sunset.zip">下载</a>
+        <a class="btn" href="prompts/voxel-sunset.md">提示词文件</a>
+      </div>
+      <details>
+        <summary>查看提示词</summary>
+        <pre>制作一个我的世界克隆版。
+
+后续要求：游戏必须能在浏览器里直接玩。你先定个计划，然后执行循环指令，不停执行，一直到开发完成。然后你必须从头到尾完整测试并通关该游戏，并确保游戏品质精良，最后确保所有内容都通过你的验证。</pre>
+        <div class="prov">我的世界本来没有"通关"。后缀要求"完整测试并通关"，它就自己设计了一条任务线，并写了 35 项从出生到通关的自动测试。</div>
+      </details>
+    </article>
+
+    <article class="card">
+      <h3>真人 CS</h3>
+      <div class="sub">three.js 第一人称射击 · 约 780KB</div>
+      <p>5v5 人机对战的炸弹拆除模式：Dust 风格地图、先到 13 胜、完整经济系统、11 种武器。画面全部程序生成，音效用 WebAudio 实时合成。</p>
+      <div class="tags"><span class="tag warn">提示词：前半句重建，后缀原文</span><span class="tag">B 购买 · E 安放/拆弹 · Tab 记分板</span></div>
+      <div class="actions">
+        <a class="btn primary" href="demos/counter-strike/index.html">打开 ▸</a>
+        <a class="btn" href="downloads/counter-strike.zip">下载</a>
+        <a class="btn" href="prompts/counter-strike.md">提示词文件</a>
+      </div>
+      <details>
+        <summary>查看提示词</summary>
+        <pre>制作一个真人 CS（反恐精英）游戏。
+
+后续要求：游戏必须能在浏览器里直接玩。你先定个计划，然后执行循环指令，不停执行，一直到开发完成。然后你必须从头到尾完整测试并通关该游戏，并确保游戏品质精良，最后确保所有内容都通过你的验证。</pre>
+        <div class="prov">前半句原文没找到，按同期句式重建；5v5、经济系统这些细节大概率是模型自己补全的。</div>
+      </details>
+    </article>
+
+    <article class="card">
+      <h3>Claude 介绍自己</h3>
+      <div class="sub">「Claude Fable 5 — 思考的艺术」· 单文件 23KB</div>
+      <p>一个滚动式的自我介绍页：讲"为什么叫 Fable"、四张能力卡、滚动到才醒来的数字，还有一个藏着彩蛋的迷你聊天框。</p>
+      <div class="tags"><span class="tag warn">提示词：推测</span><span class="tag">试试 ↑↑↓↓←→←→BA</span></div>
+      <div class="actions">
+        <a class="btn primary" href="demos/claude-intro/index.html">打开 ▸</a>
+        <a class="btn" href="downloads/claude-intro.zip">下载</a>
+        <a class="btn" href="prompts/claude-intro.md">提示词文件</a>
+      </div>
+      <details>
+        <summary>查看提示词</summary>
+        <pre>用一个 HTML 页面介绍你自己。</pre>
+        <div class="prov">原文已丢失，只记得是"一个很简单的提示词"。如果真的只有这一句，页面里的叙事和彩蛋就都是它自己加的。</div>
+      </details>
+    </article>
+
+    <article class="card">
+      <h3>麻将换三张</h3>
+      <div class="sub">对门协作麻将 · 含测试</div>
+      <p>开局换三张，一张牌被指定为癞子；我和队友对门、双方手牌可见，任意一方胡牌即队伍获胜。内置评分、智能换牌和推荐出牌。</p>
+      <div class="tags"><span class="tag bad">提示词：未找到</span><span class="tag">点击出牌</span></div>
+      <div class="actions">
+        <a class="btn primary" href="demos/mahjong-exchange/index.html">打开 ▸</a>
+        <a class="btn" href="downloads/mahjong-exchange.zip">下载</a>
+        <a class="btn" href="prompts/mahjong-exchange.md">提示词文件</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>6 月那一轮的通用后缀："游戏必须能在浏览器里直接玩。你先定个计划，然后执行循环指令，不停执行，一直到开发完成。然后你必须从头到尾完整测试并通关该游戏……"其中的"循环指令"指 Claude Code 的 <code>/loop</code>。</p>
+    <p>全部提示词与来源说明：<a href="prompts/common-suffix.md">通用后缀</a> 及各卡片的"提示词文件"。目录结构见 <a href="README.md">README</a>。</p>
+    <p>已经找不回来的：我的世界的模块源码与 35 项通关测试、巴别图书馆的游玩指南、做这些 demo 的原始对话。</p>
+  </div>
+</footer>
+</body>
+</html>
