@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三位一体能力图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap">
+<style>
+  :root {
+    --paper: #ECEEF1;
+    --sheet: #F7F8FA;
+    --grid: rgba(20, 23, 28, 0.06);
+    --ink: #14171C;
+    --ink-2: #4A515C;
+    --ink-3: #7B828E;
+    --rule: #C4C9D1;
+    --solid: #FFFFFF;
+    --beam: #14171C;
+    --on-beam: #F3F4F6;
+    --on-beam-2: rgba(243, 244, 246, 0.72);
+    --stone: #D7DBE1;
+    --hatch: #8F97A3;
+    --seal: #C4262E;
+    --on-seal: #FFFFFF;
+    --seal-frame: rgba(255, 255, 255, 0.55);
+
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+    --sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --stroke: 1.5px;
+    --hatching: repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 8px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --paper: #0E1013;
+      --sheet: #13161A;
+      --grid: rgba(231, 233, 237, 0.05);
+      --ink: #E7E9ED;
+      --ink-2: #A9B0BB;
+      --ink-3: #767E8A;
+      --rule: #30353D;
+      --solid: #1A1E24;
+      --beam: #E7E9ED;
+      --on-beam: #0E1013;
+      --on-beam-2: rgba(14, 16, 19, 0.7);
+      --stone: #1F232A;
+      --hatch: #4B525E;
+      --seal: #D6353A;
+      --on-seal: #FFFFFF;
+      --seal-frame: rgba(255, 255, 255, 0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #0E1013;
+    --sheet: #13161A;
+    --grid: rgba(231, 233, 237, 0.05);
+    --ink: #E7E9ED;
+    --ink-2: #A9B0BB;
+    --ink-3: #767E8A;
+    --rule: #30353D;
+    --solid: #1A1E24;
+    --beam: #E7E9ED;
+    --on-beam: #0E1013;
+    --on-beam-2: rgba(14, 16, 19, 0.7);
+    --stone: #1F232A;
+    --hatch: #4B525E;
+    --seal: #D6353A;
+    --on-seal: #FFFFFF;
+    --seal-frame: rgba(255, 255, 255, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    max-width: 1040px;
+    margin-inline: auto;
+    padding-inline: 16px;
+    padding-block: 40px 36px;
+  }
+  @media (min-width: 720px) {
+    .page { padding-inline: 32px; padding-block: 64px 48px; }
+  }
+
+  /* 页眉 */
+  .masthead { display: grid; gap: 14px; margin-bottom: clamp(28px, 4vw, 44px); }
+  .eyebrow { margin: 0; font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; color: var(--ink-3); }
+  h1 {
+    margin: 0;
+    font-family: var(--serif);
+    font-weight: 900;
+    font-size: clamp(34px, 6vw, 60px);
+    line-height: 1.12;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+  h1 .nw { white-space: nowrap; }
+  h1 .x { font-weight: 600; color: var(--ink-3); }
+  .lede { margin: 0; max-width: 34em; font-size: clamp(15px, 1.7vw, 17px); color: var(--ink-2); text-wrap: pretty; }
+
+  /* 立面图 */
+  .plate { margin: 0; }
+  .sheet {
+    background-color: var(--sheet);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: center top;
+    border: 1px solid var(--rule);
+    padding: clamp(14px, 4vw, 44px);
+  }
+  .hall { --inset: 2%; --gap: 2%; max-width: 880px; margin-inline: auto; }
+  @media (min-width: 720px) { .hall { --inset: 4.5%; --gap: 3%; } }
+
+  /* 三位：三个战场 */
+  .arenas {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 4%;
+    padding-inline: var(--inset);
+  }
+  .arena {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 2px;
+    padding: clamp(12px, 2.4vw, 24px) 4px clamp(10px, 2vw, 20px);
+    background: var(--solid);
+    border: var(--stroke) solid var(--ink);
+    border-top-width: 4px;
+    border-bottom: 0;
+    text-align: center;
+  }
+  .arena-name { font-family: var(--serif); font-weight: 900; font-size: clamp(19px, 3.4vw, 34px); line-height: 1.2; letter-spacing: 0.06em; }
+  .arena-en { font-family: var(--mono); font-size: clamp(9px, 1.1vw, 11px); line-height: 1.4; letter-spacing: 0.14em; color: var(--ink-3); }
+
+  /* 一体：梁 */
+  .beam {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: clamp(10px, 1.8vw, 16px) 12px;
+    background: var(--beam);
+    color: var(--on-beam);
+    text-align: center;
+  }
+  .beam-title { font-family: var(--serif); font-weight: 900; font-size: clamp(19px, 3vw, 30px); line-height: 1.3; letter-spacing: 0.4em; margin-right: -0.4em; }
+  .beam-sub { font-size: clamp(11px, 1.3vw, 13px); line-height: 1.5; letter-spacing: 0.06em; color: var(--on-beam-2); }
+
+  /* 五根柱子 */
+  .colonnade {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    column-gap: var(--gap);
+    padding-inline: var(--inset);
+  }
+  .pillar { display: flex; flex-direction: column; align-items: center; }
+  .capital {
+    align-self: stretch;
+    padding: clamp(8px, 1.4vw, 14px) 0;
+    background: var(--solid);
+    border: var(--stroke) solid var(--ink);
+    border-top: 0;
+    border-bottom-width: 3px;
+    font-family: var(--serif);
+    font-weight: 900;
+    font-size: clamp(14px, 2.3vw, 24px);
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .shaft {
+    flex: 1;
+    width: 90%;
+    min-height: clamp(220px, 30vw, 290px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: clamp(12px, 2vw, 20px);
+    background: var(--solid);
+    border-inline: var(--stroke) solid var(--ink);
+  }
+  .plinth {
+    width: 100%;
+    height: clamp(9px, 1.4vw, 14px);
+    background: var(--solid);
+    border: var(--stroke) solid var(--ink);
+    border-bottom: 0;
+  }
+  @media (min-width: 720px) {
+    .shaft { width: 66%; }
+    .plinth { width: 86%; }
+  }
+
+  /* 柱身竖排：核心问题 */
+  .q {
+    margin: 0;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(14px, 1.95vw, 19px);
+    line-height: 1.45;
+    letter-spacing: 0.08em;
+  }
+  .tcy { -webkit-text-combine: horizontal; text-combine-upright: all; }
+
+  /* 红印：我的定义 */
+  .seal {
+    background: var(--seal);
+    color: var(--on-seal);
+    font-family: var(--serif);
+    font-weight: 700;
+    border-radius: 2px;
+    outline: 1px solid var(--seal-frame);
+    outline-offset: -3px;
+  }
+  .seal-v {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: clamp(10px, 1.3vw, 13px);
+    line-height: 1;
+    letter-spacing: 0.06em;
+    padding: 0.6em 0.42em 0.54em;
+  }
+  .seal-h {
+    display: inline-block;
+    font-size: clamp(11px, 1.2vw, 12.5px);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    padding: 0.6em 0.5em 0.6em 0.62em;
+  }
+
+  /* 尺寸线：标出五大核心能力的范围 */
+  .dim { display: none; }
+  @media (min-width: 720px) {
+    .dim {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc(var(--inset) / 2 - 6px);
+      width: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-block: 1px solid var(--ink-3);
+    }
+    .dim::before, .dim::after { content: ""; flex: 1; width: 1px; background: var(--ink-3); }
+    .dim span {
+      writing-mode: vertical-rl;
+      padding-block: 10px;
+      font-size: 11px;
+      line-height: 1;
+      letter-spacing: 0.32em;
+      color: var(--ink-2);
+      white-space: nowrap;
+    }
+  }
+
+  /* 地基：数据分析 */
+  .foundation {
+    display: grid;
+    place-items: center;
+    padding: clamp(16px, 3vw, 30px) 10px;
+    background-color: var(--stone);
+    background-image: var(--hatching);
+    border: var(--stroke) solid var(--ink);
+  }
+  .bedrock {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: clamp(10px, 1.6vw, 16px) clamp(14px, 3vw, 32px);
+    background: var(--solid);
+    border: var(--stroke) solid var(--ink);
+    text-align: center;
+  }
+  .bedrock-title { font-family: var(--serif); font-weight: 900; font-size: clamp(20px, 3vw, 30px); line-height: 1.25; letter-spacing: 0.22em; margin-right: -0.22em; }
+  .bedrock-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; }
+  .bedrock-q { font-family: var(--serif); font-weight: 700; font-size: clamp(13px, 1.6vw, 16px); line-height: 1.4; }
+  .bedrock-note { font-size: clamp(11.5px, 1.25vw, 13px); line-height: 1.5; color: var(--ink-3); }
+
+  /* 图注与图例 */
+  .cap { display: grid; gap: 10px; margin-top: 16px; }
+  .cap p { margin: 0; max-width: 40em; font-size: 14.5px; color: var(--ink-2); text-wrap: pretty; }
+  .key { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink-3); }
+  .key li { display: inline-flex; align-items: center; gap: 8px; }
+  .key-seal { width: 12px; height: 16px; background: var(--seal); border-radius: 2px; }
+  .key-hatch { width: 16px; height: 16px; background-color: var(--stone); background-image: var(--hatching); border: 1px solid var(--ink); }
+
+  /* 升级对照 */
+  .upgrade { display: grid; gap: 16px; margin-top: clamp(48px, 7vw, 80px); }
+  .upgrade h2 { margin: 0; font-family: var(--serif); font-weight: 900; font-size: clamp(21px, 2.6vw, 27px); line-height: 1.3; letter-spacing: 0.04em; text-wrap: balance; }
+  .upgrade-lede { margin: 0; max-width: 36em; color: var(--ink-2); text-wrap: pretty; }
+  .compare {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.35fr);
+    align-items: start;
+    gap: 16px clamp(16px, 3vw, 36px);
+    margin-top: 6px;
+    padding: clamp(16px, 3vw, 28px);
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+  }
+  .compare-arrow { align-self: center; display: grid; place-items: center; color: var(--ink-3); }
+  .compare-arrow svg { display: block; width: 44px; height: 16px; }
+  @media (max-width: 640px) {
+    .compare { grid-template-columns: minmax(0, 1fr); }
+    .compare-arrow { justify-self: center; height: 44px; }
+    .compare-arrow svg { transform: rotate(90deg); }
+  }
+  .mini { margin: 0; display: grid; gap: 12px; }
+  .mini-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+  .mini-ver { padding: 0 6px; border: 1px solid var(--ink); font-family: var(--mono); font-weight: 500; font-size: 12px; line-height: 1.5; color: var(--ink); }
+  .mini-beam { height: 12px; background: var(--beam); }
+  .mini-cols { display: flex; justify-content: space-around; padding-inline: 4%; }
+  .mini-col > .plus { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); }
+  .mini-col {
+    position: relative;
+    width: 34px;
+    min-height: 128px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-block: 10px;
+    background: var(--solid);
+    border-inline: var(--stroke) solid var(--ink);
+  }
+  .mini-name { writing-mode: vertical-rl; text-orientation: mixed; font-family: var(--serif); font-weight: 700; font-size: 13px; line-height: 1.2; letter-spacing: 0.12em; }
+  .mini-col.is-sunk { background-color: var(--stone); background-image: var(--hatching); border-inline-style: dashed; }
+  .mini-col.is-sunk .mini-name { padding: 6px 3px; background: var(--solid); }
+  .mini-ground { height: 6px; background: var(--ink); }
+  .mini-foundation {
+    display: grid;
+    place-items: center;
+    padding: 12px 8px;
+    background-color: var(--stone);
+    background-image: var(--hatching);
+    border: var(--stroke) solid var(--ink);
+  }
+  .mini-foundation span { padding: 2px 12px; background: var(--solid); border: 1px solid var(--ink); font-family: var(--serif); font-weight: 700; font-size: 13px; line-height: 1.6; letter-spacing: 0.16em; }
+  .plus {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--solid);
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .diff { display: grid; gap: 10px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .diff li { display: grid; grid-template-columns: 16px auto minmax(0, 1fr); align-items: center; column-gap: 10px; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
+  .diff b { font-weight: 700; color: var(--ink); }
+  .sw { width: 16px; height: 16px; }
+  .sw-hatch { background-color: var(--stone); background-image: var(--hatching); border: 1px dashed var(--ink); }
+  .sw-keep { background: var(--solid); border-inline: var(--stroke) solid var(--ink); border-block: 3px solid var(--ink); }
+
+  .colophon {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 20px;
+    margin-top: clamp(48px, 7vw, 72px);
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 360px) {
+    .capital { font-size: 13px; letter-spacing: 0; }
+    .shaft { width: 96%; }
+    .q { font-size: 12.5px; }
+    .seal-v { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="masthead">
+    <p class="eyebrow">我的能力框架 · v2</p>
+    <h1><span class="nw">三位一体</span> <span class="x">×</span> <span class="nw">五大核心能力</span></h1>
+    <p class="lede">互联网、量化、电商三个战场，底下是同一套能力。五根柱子各自回答一个完全不同的问题；数据分析不再单列，而是沉为地基——像写代码一样，默认存在。</p>
+  </header>
+
+  <figure class="plate">
+    <div class="sheet">
+      <div class="hall">
+        <div class="arenas">
+          <div class="arena"><span class="arena-name">互联网</span><span class="arena-en">INTERNET</span></div>
+          <div class="arena"><span class="arena-name">量化</span><span class="arena-en">QUANT</span></div>
+          <div class="arena"><span class="arena-name">电商</span><span class="arena-en">E-COMMERCE</span></div>
+        </div>
+
+        <div class="beam">
+          <span class="beam-title">三位一体</span>
+          <span class="beam-sub">三个战场，共用同一套五大核心能力</span>
+        </div>
+
+        <div class="colonnade">
+          <div class="dim" aria-hidden="true"><span>五大核心能力</span></div>
+
+          <div class="pillar">
+            <div class="capital">AI</div>
+            <div class="shaft">
+              <p class="q">谁来思考？</p>
+              <span class="seal seal-v" title="我的定义：智力引擎">智力引擎</span>
+            </div>
+            <div class="plinth"></div>
+          </div>
+
+          <div class="pillar">
+            <div class="capital">连接器</div>
+            <div class="shaft">
+              <p class="q"><span class="tcy">AI</span>能触达<br>多少真实世界？</p>
+              <span class="seal seal-v" title="我的定义：能力边界">能力边界</span>
+            </div>
+            <div class="plinth"></div>
+          </div>
+
+          <div class="pillar">
+            <div class="capital">自动化</div>
+            <div class="shaft">
+              <p class="q">谁来持续执行？</p>
+              <span class="seal seal-v" title="我的定义：执行引擎">执行引擎</span>
+            </div>
+            <div class="plinth"></div>
+          </div>
+
+          <div class="pillar">
+            <div class="capital">可视化</div>
+            <div class="shaft">
+              <p class="q">人怎么低成本<br>掌控整个系统？</p>
+              <span class="seal seal-v" title="我的定义：控制台">控制台</span>
+            </div>
+            <div class="plinth"></div>
+          </div>
+
+          <div class="pillar">
+            <div class="capital">蒸馏</div>
+            <div class="shaft">
+              <p class="q">别人已经会的东西<br>怎么快速变成我的？</p>
+              <span class="seal seal-v" title="我的定义：学习/复制引擎">学习/复制引擎</span>
+            </div>
+            <div class="plinth"></div>
+          </div>
+        </div>
+
+        <div class="foundation">
+          <div class="bedrock">
+            <span class="bedrock-title">数据分析</span>
+            <span class="bedrock-row">
+              <span class="bedrock-q">怎么判断结果？</span>
+              <span class="seal seal-h" title="我的定义：底层默认能力">底层默认能力</span>
+            </span>
+            <span class="bedrock-note">不再单列，像写代码一样默认存在</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <figcaption class="cap">
+      <p>一根梁把三个战场连成一体，五根柱子一起托住这根梁。数据分析不是第六根柱子，而是所有柱子脚下的地基：每一根都默认用它来判断结果。</p>
+      <ul class="key">
+        <li><span class="key-seal" aria-hidden="true"></span>红印：我的定义</li>
+        <li><span class="key-hatch" aria-hidden="true"></span>斜线：地基，即默认能力</li>
+      </ul>
+    </figcaption>
+  </figure>
+
+  <section class="upgrade" aria-labelledby="upgrade-title">
+    <h2 id="upgrade-title">这次升级，改了什么</h2>
+    <p class="upgrade-lede">上一版是三个词：AI + 数据分析 + 自动化。这一版没有删掉数据分析，而是把它从一级标签里拿出来，压进地基；腾出的位置，给了连接器、可视化、蒸馏。</p>
+
+    <div class="compare">
+      <figure class="mini" aria-label="v1：AI、数据分析、自动化三根柱子">
+        <figcaption class="mini-head"><span class="mini-ver">v1</span>三个词</figcaption>
+        <div>
+          <div class="mini-beam"></div>
+          <div class="mini-cols">
+            <div class="mini-col"><span class="mini-name"><span class="tcy">AI</span></span></div>
+            <div class="mini-col is-sunk"><span class="mini-name">数据分析</span></div>
+            <div class="mini-col"><span class="mini-name">自动化</span></div>
+          </div>
+          <div class="mini-ground"></div>
+        </div>
+      </figure>
+
+      <div class="compare-arrow" aria-hidden="true">
+        <svg viewBox="0 0 44 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="41" y2="8"/><polyline points="35 3 41 8 35 13"/></svg>
+      </div>
+
+      <figure class="mini" aria-label="v2：五根柱子立在数据分析地基上">
+        <figcaption class="mini-head"><span class="mini-ver">v2</span>三位一体 × 五大核心能力</figcaption>
+        <div>
+          <div class="mini-beam"></div>
+          <div class="mini-cols">
+            <div class="mini-col"><span class="mini-name"><span class="tcy">AI</span></span></div>
+            <div class="mini-col"><span class="plus" aria-hidden="true">+</span><span class="mini-name">连接器</span></div>
+            <div class="mini-col"><span class="mini-name">自动化</span></div>
+            <div class="mini-col"><span class="plus" aria-hidden="true">+</span><span class="mini-name">可视化</span></div>
+            <div class="mini-col"><span class="plus" aria-hidden="true">+</span><span class="mini-name">蒸馏</span></div>
+          </div>
+          <div class="mini-foundation"><span>数据分析</span></div>
+        </div>
+      </figure>
+    </div>
+
+    <ul class="diff">
+      <li><span class="sw sw-hatch" aria-hidden="true"></span><b>下沉</b><span>数据分析：移出一级能力，内化为底层默认能力</span></li>
+      <li><span class="sw plus" aria-hidden="true">+</span><b>新增</b><span>连接器 · 可视化 · 蒸馏</span></li>
+      <li><span class="sw sw-keep" aria-hidden="true"></span><b>保留</b><span>AI · 自动化</span></li>
+    </ul>
+  </section>
+
+  <footer class="colophon">
+    <span>三位一体能力图</span>
+    <span>v2 · 2026-09-24</span>
+  </footer>
+</main>
+</body>
+</html>

@@ -19,6 +19,7 @@ demo-sw.js            旧版展示站的 Service Worker 的注销脚本，保留
 
 | 名称 | 模型 | 时间 | 提示词状态 |
 |---|---|---|---|
+| `trinity-map` 三位一体能力图 | Claude Opus 5.5 | 2026-09 | 原文 |
 | `programmer-day` 程序员的一天 | Claude Opus 5.5 | 2026-09 | 原文 |
 | `babel-library` 巴别图书馆 | Claude Fable 5 | 2026-06 | 原文 |
 | `voxel-sunset` 永恒落日 · 我的世界 | Claude Fable 5 | 2026-06 | 前半句推测，后缀原文 |
@@ -30,7 +31,7 @@ demo-sw.js            旧版展示站的 Service Worker 的注销脚本，保留
 
 ## 新增一轮
 
-1. 把成品放进 `demos/<名称>/`，入口必须是 `index.html`，且不依赖外部资源。
+1. 把成品放进 `demos/<名称>/`，入口必须是 `index.html`，并注明外部资源依赖；三位一体能力图保留原作的 Google Fonts 引用，字体不可用时使用系统字体。
 2. 提示词写进 `prompts/<名称>.md`，第一行用 HTML 注释写明状态（原文 / 推测 / 重建）。
 3. 打包 `downloads/<名称>.zip`（可以带源码）。
 4. 在 `index.html` 里复制一张卡片，填上标题、说明、标签和三个链接；新一代模型单独开一个 `<section>`。
