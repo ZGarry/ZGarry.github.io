@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>三位一体能力图</title>
+<title>三位一体能力图 · 连接器 × 蒸馏</title>
+<meta name="description" content="三个战场、五大核心能力。记录从网页四种访问方式，到接入软件数据、功能与工作流的认识。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap">
@@ -201,7 +202,7 @@
     height: clamp(9px, 1.4vw, 14px);
     background: var(--solid);
     border: var(--stroke) solid var(--ink);
-    border-bottom: 0;
+    border-bottom: var(--stroke) solid var(--ink);
   }
   @media (min-width: 720px) {
     .shaft { width: 66%; }
@@ -273,111 +274,12 @@
     }
   }
 
-  /* 地基：数据分析 */
-  .foundation {
-    display: grid;
-    place-items: center;
-    padding: clamp(16px, 3vw, 30px) 10px;
-    background-color: var(--stone);
-    background-image: var(--hatching);
-    border: var(--stroke) solid var(--ink);
-  }
-  .bedrock {
-    display: grid;
-    justify-items: center;
-    gap: 6px;
-    max-width: 100%;
-    padding: clamp(10px, 1.6vw, 16px) clamp(14px, 3vw, 32px);
-    background: var(--solid);
-    border: var(--stroke) solid var(--ink);
-    text-align: center;
-  }
-  .bedrock-title { font-family: var(--serif); font-weight: 900; font-size: clamp(20px, 3vw, 30px); line-height: 1.25; letter-spacing: 0.22em; margin-right: -0.22em; }
-  .bedrock-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; }
-  .bedrock-q { font-family: var(--serif); font-weight: 700; font-size: clamp(13px, 1.6vw, 16px); line-height: 1.4; }
-  .bedrock-note { font-size: clamp(11.5px, 1.25vw, 13px); line-height: 1.5; color: var(--ink-3); }
-
   /* 图注与图例 */
   .cap { display: grid; gap: 10px; margin-top: 16px; }
   .cap p { margin: 0; max-width: 40em; font-size: 14.5px; color: var(--ink-2); text-wrap: pretty; }
   .key { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink-3); }
   .key li { display: inline-flex; align-items: center; gap: 8px; }
   .key-seal { width: 12px; height: 16px; background: var(--seal); border-radius: 2px; }
-  .key-hatch { width: 16px; height: 16px; background-color: var(--stone); background-image: var(--hatching); border: 1px solid var(--ink); }
-
-  /* 升级对照 */
-  .upgrade { display: grid; gap: 16px; margin-top: clamp(48px, 7vw, 80px); }
-  .upgrade h2 { margin: 0; font-family: var(--serif); font-weight: 900; font-size: clamp(21px, 2.6vw, 27px); line-height: 1.3; letter-spacing: 0.04em; text-wrap: balance; }
-  .upgrade-lede { margin: 0; max-width: 36em; color: var(--ink-2); text-wrap: pretty; }
-  .compare {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.35fr);
-    align-items: start;
-    gap: 16px clamp(16px, 3vw, 36px);
-    margin-top: 6px;
-    padding: clamp(16px, 3vw, 28px);
-    background: var(--sheet);
-    border: 1px solid var(--rule);
-  }
-  .compare-arrow { align-self: center; display: grid; place-items: center; color: var(--ink-3); }
-  .compare-arrow svg { display: block; width: 44px; height: 16px; }
-  @media (max-width: 640px) {
-    .compare { grid-template-columns: minmax(0, 1fr); }
-    .compare-arrow { justify-self: center; height: 44px; }
-    .compare-arrow svg { transform: rotate(90deg); }
-  }
-  .mini { margin: 0; display: grid; gap: 12px; }
-  .mini-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
-  .mini-ver { padding: 0 6px; border: 1px solid var(--ink); font-family: var(--mono); font-weight: 500; font-size: 12px; line-height: 1.5; color: var(--ink); }
-  .mini-beam { height: 12px; background: var(--beam); }
-  .mini-cols { display: flex; justify-content: space-around; padding-inline: 4%; }
-  .mini-col > .plus { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); }
-  .mini-col {
-    position: relative;
-    width: 34px;
-    min-height: 128px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding-block: 10px;
-    background: var(--solid);
-    border-inline: var(--stroke) solid var(--ink);
-  }
-  .mini-name { writing-mode: vertical-rl; text-orientation: mixed; font-family: var(--serif); font-weight: 700; font-size: 13px; line-height: 1.2; letter-spacing: 0.12em; }
-  .mini-col.is-sunk { background-color: var(--stone); background-image: var(--hatching); border-inline-style: dashed; }
-  .mini-col.is-sunk .mini-name { padding: 6px 3px; background: var(--solid); }
-  .mini-ground { height: 6px; background: var(--ink); }
-  .mini-foundation {
-    display: grid;
-    place-items: center;
-    padding: 12px 8px;
-    background-color: var(--stone);
-    background-image: var(--hatching);
-    border: var(--stroke) solid var(--ink);
-  }
-  .mini-foundation span { padding: 2px 12px; background: var(--solid); border: 1px solid var(--ink); font-family: var(--serif); font-weight: 700; font-size: 13px; line-height: 1.6; letter-spacing: 0.16em; }
-  .plus {
-    display: grid;
-    place-items: center;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--ink);
-    color: var(--solid);
-    font-family: var(--mono);
-    font-weight: 500;
-    font-size: 12px;
-    line-height: 1;
-  }
-
-  .diff { display: grid; gap: 10px; margin: 4px 0 0; padding: 0; list-style: none; }
-  .diff li { display: grid; grid-template-columns: 16px auto minmax(0, 1fr); align-items: center; column-gap: 10px; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
-  .diff b { font-weight: 700; color: var(--ink); }
-  .sw { width: 16px; height: 16px; }
-  .sw-hatch { background-color: var(--stone); background-image: var(--hatching); border: 1px dashed var(--ink); }
-  .sw-keep { background: var(--solid); border-inline: var(--stroke) solid var(--ink); border-block: 3px solid var(--ink); }
 
   .colophon {
     display: flex;
@@ -398,14 +300,69 @@
     .q { font-size: 12.5px; }
     .seal-v { font-size: 9px; }
   }
+
+  /* 今日认识沿用纸张、墨色与红印的视觉语言。 */
+  html { scroll-behavior: smooth; }
+  [id] { scroll-margin-top: 24px; }
+  .capital a { color: inherit; text-decoration: none; text-underline-offset: 5px; }
+  .capital a:hover { text-decoration: underline; }
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--seal); outline-offset: 5px; }
+  .learning { display: grid; gap: 28px; margin-top: clamp(40px, 7vw, 72px); }
+  .section-head { display: grid; gap: 8px; }
+  .section-head h2 { margin: 0; font: 900 clamp(26px, 4vw, 40px)/1.3 var(--serif); }
+  .section-head p { margin: 0; max-width: 45em; color: var(--ink-2); }
+  .insight { margin: 0; padding: clamp(20px, 4vw, 36px); background: var(--beam); color: var(--on-beam); border-left: 5px solid var(--seal); }
+  .insight p { margin: 12px 0; max-width: 25em; font: 700 clamp(23px, 3.6vw, 36px)/1.6 var(--serif); text-wrap: pretty; }
+  .insight cite { font-style: normal; font-size: 12px; color: var(--on-beam-2); }
+  .section-label { font: 500 11px/1.5 var(--mono); letter-spacing: .12em; }
+  .insight .section-label { color: var(--on-beam-2); }
+  .equation { padding: 24px; background: var(--sheet); border: 1px solid var(--rule); }
+  .equation p { margin: 0; font: 700 clamp(19px, 3vw, 28px)/1.8 var(--serif); }
+  .equation .note { margin-top: 10px; font: 400 13px/1.8 var(--sans); color: var(--ink-2); }
+  .equation em { color: var(--seal); font-style: normal; }
+  .principles { list-style: none; padding: 0; margin: 0; counter-reset: lessons; }
+  .principles li { counter-increment: lessons; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 14px; padding: 23px 0; border-top: 1px solid var(--rule); }
+  .principles li::before { content: counter(lessons, decimal-leading-zero); color: var(--seal); font: 500 13px/2 var(--mono); }
+  .principles h3 { margin: 0 0 7px; font: 700 clamp(17px, 2vw, 21px)/1.5 var(--serif); }
+  .principles p { margin: 0; color: var(--ink-2); max-width: 48em; }
+  .route-section { padding: clamp(18px, 3vw, 30px); background: var(--sheet); border: 1px solid var(--rule); }
+  .route-section h3, .capability h3 { margin: 0 0 8px; font: 700 22px/1.5 var(--serif); }
+  .route-section > p, .capability > p { color: var(--ink-2); margin: 0 0 20px; }
+  .routes { margin: 0; }
+  .routes > div { display: grid; grid-template-columns: minmax(140px, .75fr) minmax(0, 1.8fr); gap: 12px; padding: 14px 0; border-top: 1px solid var(--rule); }
+  .routes dt { font-weight: 700; }
+  .routes dd { margin: 0; color: var(--ink-2); }
+  .desktop-routes { margin-top: 22px; padding-top: 18px; border-top: 2px solid var(--ink); }
+  .desktop-routes p { margin: 0; color: var(--ink-2); }
+  .desktop-routes strong { color: var(--ink); }
+  .capability { padding-block: 4px; }
+  .choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+  .choices button { cursor: pointer; padding: 10px 18px; border: 1px solid var(--rule); background: var(--solid); color: var(--ink); font: 500 14px/1.5 var(--sans); }
+  .choices button[aria-pressed="true"] { border-color: var(--ink); background: var(--beam); color: var(--on-beam); }
+  .example { padding: 24px; border: 1px solid var(--rule); background: var(--sheet); }
+  .example h4 { margin: 0 0 10px; font: 700 20px/1.5 var(--serif); }
+  .example p { margin: 0; color: var(--ink-2); }
+  .example .flow { margin: 18px 0; padding-block: 14px; border-block: 1px solid var(--rule); color: var(--ink); line-height: 2; overflow-wrap: anywhere; }
+  .example .result { color: var(--ink); }
+  [hidden] { display: none !important; }
+  .closing { padding-block: 28px 4px; border-top: 2px solid var(--ink); }
+  .closing p { margin: 0; font: 700 clamp(25px, 4vw, 40px)/1.65 var(--serif); text-wrap: balance; }
+  .closing .note { margin-top: 14px; font: 400 14px/1.8 var(--sans); color: var(--ink-2); }
+  @media (max-width: 560px) {
+    .routes > div { grid-template-columns: 1fr; gap: 4px; }
+    .principles li { grid-template-columns: 26px minmax(0, 1fr); gap: 8px; }
+    .equation { padding: 18px; }
+    .choices button { flex: 1; padding-inline: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 </head>
 <body>
 <main class="page">
   <header class="masthead">
-    <p class="eyebrow">我的能力框架 · v2</p>
+    <p class="eyebrow">我的能力框架 · 3 + 5</p>
     <h1><span class="nw">三位一体</span> <span class="x">×</span> <span class="nw">五大核心能力</span></h1>
-    <p class="lede">互联网、量化、电商三个战场，底下是同一套能力。五根柱子各自回答一个完全不同的问题；数据分析不再单列，而是沉为地基——像写代码一样，默认存在。</p>
+    <p class="lede">互联网、量化、电商三个战场，共用 AI、连接器、自动化、可视化、蒸馏五大核心能力。把外部的数据、功能与工作流，接进自己的系统。</p>
   </header>
 
   <figure class="plate">
@@ -435,7 +392,7 @@
           </div>
 
           <div class="pillar">
-            <div class="capital">连接器</div>
+            <div class="capital"><a href="#connectors">连接器</a></div>
             <div class="shaft">
               <p class="q"><span class="tcy">AI</span>能触达<br>多少真实世界？</p>
               <span class="seal seal-v" title="我的定义：能力边界">能力边界</span>
@@ -462,7 +419,7 @@
           </div>
 
           <div class="pillar">
-            <div class="capital">蒸馏</div>
+            <div class="capital"><a href="#distill">蒸馏</a></div>
             <div class="shaft">
               <p class="q">别人已经会的东西<br>怎么快速变成我的？</p>
               <span class="seal seal-v" title="我的定义：学习/复制引擎">学习/复制引擎</span>
@@ -471,77 +428,112 @@
           </div>
         </div>
 
-        <div class="foundation">
-          <div class="bedrock">
-            <span class="bedrock-title">数据分析</span>
-            <span class="bedrock-row">
-              <span class="bedrock-q">怎么判断结果？</span>
-              <span class="seal seal-h" title="我的定义：底层默认能力">底层默认能力</span>
-            </span>
-            <span class="bedrock-note">不再单列，像写代码一样默认存在</span>
-          </div>
-        </div>
       </div>
     </div>
 
     <figcaption class="cap">
-      <p>一根梁把三个战场连成一体，五根柱子一起托住这根梁。数据分析不是第六根柱子，而是所有柱子脚下的地基：每一根都默认用它来判断结果。</p>
+      <p>三个战场，共用五种能力。AI 思考，连接器触达，自动化执行，可视化掌控，蒸馏把已有经验和能力沉淀为自己的工具。</p>
       <ul class="key">
         <li><span class="key-seal" aria-hidden="true"></span>红印：我的定义</li>
-        <li><span class="key-hatch" aria-hidden="true"></span>斜线：地基，即默认能力</li>
       </ul>
     </figcaption>
   </figure>
 
-  <section class="upgrade" aria-labelledby="upgrade-title">
-    <h2 id="upgrade-title">这次升级，改了什么</h2>
-    <p class="upgrade-lede">上一版是三个词：AI + 数据分析 + 自动化。这一版没有删掉数据分析，而是把它从一级标签里拿出来，压进地基；腾出的位置，给了连接器、可视化、蒸馏。</p>
 
-    <div class="compare">
-      <figure class="mini" aria-label="v1：AI、数据分析、自动化三根柱子">
-        <figcaption class="mini-head"><span class="mini-ver">v1</span>三个词</figcaption>
-        <div>
-          <div class="mini-beam"></div>
-          <div class="mini-cols">
-            <div class="mini-col"><span class="mini-name"><span class="tcy">AI</span></span></div>
-            <div class="mini-col is-sunk"><span class="mini-name">数据分析</span></div>
-            <div class="mini-col"><span class="mini-name">自动化</span></div>
-          </div>
-          <div class="mini-ground"></div>
-        </div>
-      </figure>
+  <section class="learning" id="connectors" aria-labelledby="learning-title">
+    <header class="section-head">
+      <p class="eyebrow">2026.10.23 / 今日认识</p>
+      <h2 id="learning-title">连接器 × 蒸馏</h2>
+      <p>从访问网页，到接入软件；从获取数据，到复用功能与工作流。原来，能力的边界还可以这样打开。</p>
+    </header>
 
-      <div class="compare-arrow" aria-hidden="true">
-        <svg viewBox="0 0 44 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="8" x2="41" y2="8"/><polyline points="35 3 41 8 35 13"/></svg>
-      </div>
+    <blockquote class="insight">
+      <span class="section-label">我的核心判断</span>
+      <p>反向代理等逆向技术，才是我们年轻人最应该掌握的技术。</p>
+      <cite>本质就是一种连接器 + 蒸馏。</cite>
+    </blockquote>
 
-      <figure class="mini" aria-label="v2：五根柱子立在数据分析地基上">
-        <figcaption class="mini-head"><span class="mini-ver">v2</span>三位一体 × 五大核心能力</figcaption>
-        <div>
-          <div class="mini-beam"></div>
-          <div class="mini-cols">
-            <div class="mini-col"><span class="mini-name"><span class="tcy">AI</span></span></div>
-            <div class="mini-col"><span class="plus" aria-hidden="true">+</span><span class="mini-name">连接器</span></div>
-            <div class="mini-col"><span class="mini-name">自动化</span></div>
-            <div class="mini-col"><span class="plus" aria-hidden="true">+</span><span class="mini-name">可视化</span></div>
-            <div class="mini-col"><span class="plus" aria-hidden="true">+</span><span class="mini-name">蒸馏</span></div>
-          </div>
-          <div class="mini-foundation"><span>数据分析</span></div>
-        </div>
-      </figure>
+    <div class="equation">
+      <p>别人有的数据 → 我可以看<br>→ <em>我可以把它变成自己可用的数据</em></p>
+      <p class="note">把“看到”继续做成读取、校验、保存和持续更新。在可访问、可保存的范围内，让数据真正进入自己的系统。</p>
     </div>
 
-    <ul class="diff">
-      <li><span class="sw sw-hatch" aria-hidden="true"></span><b>下沉</b><span>数据分析：移出一级能力，内化为底层默认能力</span></li>
-      <li><span class="sw plus" aria-hidden="true">+</span><b>新增</b><span>连接器 · 可视化 · 蒸馏</span></li>
-      <li><span class="sw sw-keep" aria-hidden="true"></span><b>保留</b><span>AI · 自动化</span></li>
-    </ul>
+    <ol class="principles" aria-label="今天学到的八个条目">
+      <li><div><h3>一个软件，大多数时候只用了其中一部分</h3><p>我需要的可能只是一份数据、一次计算或一个导出功能。找到最有用的那一段，就能把它接进自己的流程。</p></div></li>
+      <li><div><h3>界面背后，还有 API、数据和工作流</h3><p>一个按钮背后，可能已经完成下载、整理、补缺、计算和导出。接入这个结果，也是在利用它之前完成的大量工作。</p></div></li>
+      <li><div><h3>网页可以接，桌面软件也可以接</h3><p>网络请求、本地文件、缓存、数据库、SDK、命令行、进程通信，都可能是入口。界面只是其中一个接入位置。</p></div></li>
+      <li><div><h3>逆向让入口可理解，连接器让入口可复用</h3><p>研究协议、文件格式和程序行为，弄清楚数据从哪里来、结果如何产生；再封装成输入明确、输出可验证的工具。反向代理负责转发流量，本身不等于逆向。</p></div></li>
+      <li id="distill"><div><h3>蒸馏：把别人已经会的，沉淀为自己的工具</h3><p>这里的蒸馏，是理解并吸收已有经验、功能与工作流，形成可复用的实现。可以先调用成熟软件，再根据价值决定是否独立实现。</p></div></li>
+      <li><div><h3>能调用、能组合，也是一种能力</h3><p>一份文件、一个持续数据源、一个计算功能，各有价值。关键是知道自己获得了什么、仍依赖什么，以及能不能稳定重复使用。</p></div></li>
+      <li><div><h3>新的能力，常常出现在连接器之间</h3><p>行情接公告，公告接持仓，持仓接研究与执行记录。多个软件各贡献一段，组合后可以回答任何单个软件都没有直接给出的问题。</p></div></li>
+      <li><div><h3>接通一次之后，要能够长期使用</h3><p>记录来源、字段含义、更新时间和完整性；选定的数据按需留存、去重和更新。发现一次入口，积累一项可靠能力。</p></div></li>
+    </ol>
+
+    <section class="route-section" aria-labelledby="routes-title">
+      <h3 id="routes-title">四条网页路线，继续向软件延伸</h3>
+      <p>2026 年 9 月 20 日，《评估禅道接入 Stainless 方案》中讨论的四种访问方式。</p>
+      <dl class="routes">
+        <div><dt>01 · 正式 API</dt><dd>调用系统提供的接口；已有 OpenAPI 描述时，可以生成 SDK。</dd></div>
+        <div><dt>02 · JSON / GraphQL</dt><dd>理解网页背后的请求，把可以稳定复现的查询和操作封装起来。</dd></div>
+        <div><dt>03 · HTML / Form</dt><dd>直接请求页面、解析 HTML、提交表单，连接传统网站和企业后台。</dd></div>
+        <div><dt>04 · 浏览器自动化</dt><dd>操作页面元素，完成依赖浏览器环境的交互，必要时结合截图识别。</dd></div>
+      </dl>
+      <div class="desktop-routes"><p><strong>现在，再加上软件里的入口：</strong>本地文件与数据库、SDK 与命令行、私有协议与进程通信、运行时数据，以及桌面控件和视觉操作。按任务选择稳定、直接、容易验证的接入位置。</p></div>
+    </section>
+
+    <section class="capability" aria-labelledby="capability-title">
+      <h3 id="capability-title">我到底接入了什么？</h3>
+      <p>以行情软件为例，选择一种接入，看看自己获得的能力。</p>
+      <div class="choices" role="group" aria-label="选择接入类型">
+        <button type="button" aria-pressed="true" aria-controls="example-data" data-example="data">数据</button>
+        <button type="button" aria-pressed="false" aria-controls="example-function" data-example="function">功能</button>
+        <button type="button" aria-pressed="false" aria-controls="example-workflow" data-example="workflow">工作流</button>
+      </div>
+      <div id="example-data" class="example" role="region" aria-labelledby="data-title">
+        <h4 id="data-title">把已经整理好的数据接进来</h4>
+        <p>例如读取本地历史行情或导出文件；具体内容与口径，需要对实际软件逐项核验。</p>
+        <p class="flow">本地文件 / 导出结果 → 解析与校验 → 自己可查询的数据</p>
+        <p class="result">获得一份数据；接通持续更新后，才进一步获得长期数据源。</p>
+      </div>
+      <div id="example-function" class="example" role="region" aria-labelledby="function-title" hidden>
+        <h4 id="function-title">按自己的参数，调用它的计算</h4>
+        <p>例如调用现有指标计算入口，让成熟软件对指定证券和日期返回结果。</p>
+        <p class="flow">我的参数 → 已有计算功能 → 核验结果 → 接入后续任务</p>
+        <p class="result">获得可调用的功能；运行时仍可能依赖原软件、登录状态和数据源。</p>
+      </div>
+      <div id="example-workflow" class="example" role="region" aria-labelledby="workflow-title" hidden>
+        <h4 id="workflow-title">让它完成一段任务，再交给我</h4>
+        <p>例如把已有的更新、补缺、整理与导出过程封装为一次任务，不必每次手工执行。</p>
+        <p class="flow">发起任务 → 更新与整理 → 导出与核验 → 我的系统继续处理</p>
+        <p class="result">获得可编排的工作环节；记录完成状态，失败时能定位和恢复。</p>
+      </div>
+    </section>
+
+    <div class="closing">
+      <p>而今而后，<br>各种数据 + 各种能力，<br>恐怕也是任我行了啊。</p>
+      <p class="note">把外部能力接进来，把已有经验蒸馏下来，把完整工作流掌握在自己手里。</p>
+    </div>
   </section>
+
 
   <footer class="colophon">
     <span>三位一体能力图</span>
-    <span>v2 · 2026-09-24</span>
+    <span>2026-10-23 · 连接器 × 蒸馏</span>
   </footer>
 </main>
+
+<script>
+  // 通过原生按钮切换接入示例，支持键盘与辅助技术。
+  const choices = document.querySelectorAll('[data-example]');
+  choices.forEach((button) => {
+    button.addEventListener('click', () => {
+      choices.forEach((choice) => {
+        const selected = choice === button;
+        choice.setAttribute('aria-pressed', String(selected));
+        document.getElementById(choice.getAttribute('aria-controls')).hidden = !selected;
+      });
+    });
+  });
+</script>
 </body>
 </html>
