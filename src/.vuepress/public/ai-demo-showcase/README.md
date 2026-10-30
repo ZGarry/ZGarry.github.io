@@ -52,3 +52,5 @@ demo-sw.js            旧版展示站的 Service Worker 的注销脚本，保留
 首页新增独立“最佳实践”栏目，入口 `practices/cloud-business/index.html`；原能力图末尾与首页能力图卡片同步增加阅读入口。保留原有 9 个 demo 的数量和模型归属，实践文章不计入模型对比。
 
 新增内容围绕“三位一体 × 五大核心能力”，提炼 AI-coder 的通用机制，展开自媒体、量化、电商建设方案、验收标准、授权边界和复盘方式。已有实践参照与未来方案分别说明，不宣称未经验证的经营效果。来源见 `prompts/cloud-business.md`。
+
+最佳实践现已并入能力图：`demos/trinity-map/index.html#practice`。顶部切换“能力图 / 最佳实践”，同一 HTML 内完成阅读，旧独立入口自动跳转。两个下载包均包含完整合并页面。
