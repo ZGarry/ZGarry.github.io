@@ -1,0 +1,5 @@
+/* Font Awesome Free 6.7.2 official SVG glyphs; see LICENSE.txt. */
+.blog-icon { display: inline-block; width: 1em; height: 1em; background-color: currentColor; -webkit-mask: var(--blog-icon) center / contain no-repeat; mask: var(--blog-icon) center / contain no-repeat; vertical-align: -0.125em; }
+.blog-icon-home { --blog-icon: url('./home.svg'); }
+.blog-icon-book { --blog-icon: url('./book.svg'); }
+.blog-icon-circle-info { --blog-icon: url('./circle-info.svg'); }

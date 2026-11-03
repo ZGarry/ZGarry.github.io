@@ -1,18 +1,13 @@
-# AI无相神功#2 AI的问题拆分法
+---
+title: "AI无相神功 #2 AI的问题拆分法"
+article: false
+index: false
+sidebar: false
+sitemap: false
+head:
+  - - meta
+    - http-equiv: refresh
+      content: "0; url=/posts/AI%E6%97%A0%E7%9B%B8%E7%A5%9E%E5%8A%9F/AI%E6%97%A0%E7%9B%B8%E7%A5%9E%E5%8A%9F_2%20AI%E7%9A%84%E9%97%AE%E9%A2%98%E6%8B%86%E5%88%86%E6%B3%95.html"
+---
 
- ![](img/9f8e073c-e22a-4689-b40b-3b999330d368.jpg)
- 
-AI不擅长的场景是：多个context在不同地方
-擅长的场景是：聚焦的context
-解决不了的问题是：完全没有人探索过的知识，拆解、组合也不行。如基本理论研究。
- 
-一个可以优化的点是，使用像是Cursor这样的工具，辅助你提供context，免去自己裁剪context的过程。
-二是拆分流程，让单次聚焦一个更小的context。
-AI擅长更加小的context，但是这并不意味着AI解决不了全局的问题。
- 
-解决方式很简单，先对全局进行提问，然后再对细节进行提问。
- 
-例如“我想用python写一个脚本，其可以从youtube下载视频，并且自动上传到bilibili，应该怎么做？”这是一个全局的问题。
-然后AI会先帮你拆分问题。
- 
-每个部分，你单独基于更小的context去提问，最后组装起来即可。
+文章已整理到独立目录：[继续阅读](/posts/AI%E6%97%A0%E7%9B%B8%E7%A5%9E%E5%8A%9F/AI%E6%97%A0%E7%9B%B8%E7%A5%9E%E5%8A%9F_2%20AI%E7%9A%84%E9%97%AE%E9%A2%98%E6%8B%86%E5%88%86%E6%B3%95.html)。

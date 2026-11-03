@@ -10,13 +10,16 @@ export default hopeTheme({
     url: "https://zgarry.github.io",
   },
 
-  iconAssets: "fontawesome-with-brands",
+  // Keep icons local: the first render must not wait for an overseas icon CDN.
+  iconAssets: "/assets/vendor/fontawesome-6.7.2/icons.css",
+  iconPrefix: "blog-icon blog-icon-",
 
   logo: "/logo.svg",
 
   repo: "ZGarry/ZGarry.github.io",
 
   docsDir: "src",
+  docsBranch: "master",
 
   // navbar
   navbar,
@@ -41,23 +44,19 @@ export default hopeTheme({
   },
 
   plugins: {
-    blog: true,
+    blog: { excerptLength: 100 },
 
     mdEnhance: {
       align: true,
       attrs: true,
-      chart: true,
       codetabs: true,
-      echarts: true,
       figure: true,
-      flowchart: true,
       gfm: true,
       imgLazyload: true,
       imgSize: true,
       include: true,
       katex: true,
       mark: true,
-      mermaid: true,
       stylize: [
         {
           matcher: "Recommended",
@@ -77,4 +76,4 @@ export default hopeTheme({
       vPre: true,
     },
   },
-});
+}, { custom: true });

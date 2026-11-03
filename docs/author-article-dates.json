@@ -1,0 +1,142 @@
+{
+  "打工人手册#1 目标管理.md": {
+    "date": "2023-08-20",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#10 利息.md": {
+    "date": "2023-08-30",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#11 职场给不了你的.md": {
+    "date": "2023-08-31",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#12 不要追求职场进步.md": {
+    "date": "2023-09-01",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#13 工具.md": {
+    "date": "2023-09-02",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#2 原则.md": {
+    "date": "2023-08-21",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#3 输出功率.md": {
+    "date": "2023-08-22",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#4 中途.md": {
+    "date": "2023-08-23",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#5 冷启动.md": {
+    "date": "2023-08-24",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#5.5 输赢.md": {
+    "date": "2023-08-25",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#6 价值.md": {
+    "date": "2023-08-26",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#7 难难难.md": {
+    "date": "2023-08-27",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#8 大有大的难处.md": {
+    "date": "2023-08-28",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  },
+  "打工人手册#9 捡瓶子的艺术.md": {
+    "date": "2023-08-29",
+    "precision": "day",
+    "source": "author_daily_sequence",
+    "anchor": {
+      "article": 4,
+      "date": "2023-08-23"
+    },
+    "rule": "作者确认：前后每日一篇，5.5篇占一天；第5篇8/24，5.5篇8/25，第6篇8/26。"
+  }
+}
