@@ -1,12 +1,13 @@
 {
   "confirmed_on": "2026-11-05",
   "status": "completed",
-  "count": 111,
+  "count": 112,
   "missing_numbers": [],
   "duplicate_numbers": [
     6
   ],
   "extra_numbers": [
+    2.5,
     42.5,
     96.5
   ],
@@ -33,6 +34,18 @@
       "route": "/posts/AI无相神功/AI无相神功_2 AI的问题拆分法.html",
       "original_title": "AI无相神功#2 AI的问题拆分法",
       "handling": "保留博客既有正文；原帖原文另存于离线归档"
+    },
+    {
+      "note_id": "66ebb9a90000000012011fe4",
+      "category": "AI无相神功",
+      "number": 2.5,
+      "title": "AI无相神功 #2.5 AI和拆分问题",
+      "date": "2024-09-19T13:42:02+08:00",
+      "date_source": "xiaohongshu",
+      "file": "src/posts/AI无相神功/002-66ebb9a90000000012011fe4.md",
+      "route": "/posts/AI无相神功/002-66ebb9a90000000012011fe4.html",
+      "original_title": "AI和拆分问题",
+      "handling": "作者指定收录；原帖原文导入"
     },
     {
       "note_id": "672d949a0000000019019658",

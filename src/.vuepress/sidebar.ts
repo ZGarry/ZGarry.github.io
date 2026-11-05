@@ -463,6 +463,10 @@ export default sidebar({
       "link": "/posts/AI无相神功/AI无相神功_2 AI的问题拆分法.html"
     },
     {
+      "text": "AI无相神功 #2.5 AI和拆分问题",
+      "link": "/posts/AI无相神功/002-66ebb9a90000000012011fe4.html"
+    },
+    {
       "text": "AI无相神功 #3 定期定额",
       "link": "/posts/AI无相神功/AI无相神功_3 定期定额.html"
     },
@@ -626,14 +630,14 @@ export default sidebar({
       "text": "AI无相神功 #42 复杂数据系统一定要先构建基线",
       "link": "/posts/AI无相神功/042-68edcb380000000004014822.html"
     },
-{
-  "text": "AI无相神功 #42.5 可能性之书，笛卡尔积",
-  "link": "/posts/AI无相神功/042-68f4846b00000000050114f8.html"
-},
-{
-  "text": "AI无相神功 #43 文生图最佳实践",
-  "link": "/posts/AI无相神功/043-6823ff5f0000000022004b78.html"
-},
+    {
+      "text": "AI无相神功 #42.5 可能性之书，笛卡尔积",
+      "link": "/posts/AI无相神功/042-68f4846b00000000050114f8.html"
+    },
+    {
+      "text": "AI无相神功 #43 文生图最佳实践",
+      "link": "/posts/AI无相神功/043-6823ff5f0000000022004b78.html"
+    },
     {
       "text": "AI无相神功 #44 局部最优",
       "link": "/posts/AI无相神功/044-68f843ef0000000007037752.html"
@@ -746,10 +750,10 @@ export default sidebar({
       "text": "AI无相神功 #71 一切皆周期",
       "link": "/posts/AI无相神功/071-6981e8c7000000000e03f64d.html"
     },
-{
-  "text": "AI无相神功 #72 从茹毛饮血到刀耕火种",
-  "link": "/posts/AI无相神功/072-689c01ab000000001b0312d1.html"
-},
+    {
+      "text": "AI无相神功 #72 从茹毛饮血到刀耕火种",
+      "link": "/posts/AI无相神功/072-689c01ab000000001b0312d1.html"
+    },
     {
       "text": "AI无相神功 #73 无策略者的自以为是",
       "link": "/posts/AI无相神功/073-6981e98e000000001a021e19.html"
@@ -936,6 +940,26 @@ export default sidebar({
     {
       "text": "SP8 职场的天花板",
       "link": "/posts/待分类/职场的天花板.html"
+    },
+    {
+      "text": "深圳行(一)",
+      "link": "/posts/待分类/677d4153000000000900fa3c.html"
+    },
+    {
+      "text": "深圳行(三)",
+      "link": "/posts/待分类/677eb477000000001800f7cc.html"
+    },
+    {
+      "text": "深圳行(二)",
+      "link": "/posts/待分类/677df496000000001a034716.html"
+    },
+    {
+      "text": "深圳行(五)",
+      "link": "/posts/待分类/677f33d8000000002001a428.html"
+    },
+    {
+      "text": "深圳行(四)",
+      "link": "/posts/待分类/677eb563000000000800ef7f.html"
     }
   ]
 },

@@ -149,5 +149,53 @@
     "title": "可能性之书，笛卡尔积",
     "confirmed_on": "2026-11-05",
     "basis": "作者要求作为 .5 插篇，按原帖时间放在第42篇之后"
+  },
+  "66ebb9a90000000012011fe4": {
+    "category": "AI无相神功",
+    "number": 2.5,
+    "title": "AI和拆分问题",
+    "publish": true,
+    "confirmed_on": "2026-11-05",
+    "basis": "作者要求AI拆分问题作为 .5 插篇，置于第2篇问题拆分法之后"
+  },
+  "677d4153000000000900fa3c": {
+    "category": "待分类",
+    "number": null,
+    "title": "深圳行(一)",
+    "publish": true,
+    "confirmed_on": "2026-11-05",
+    "basis": "作者要求将深圳行系列收录到待分类"
+  },
+  "677df496000000001a034716": {
+    "category": "待分类",
+    "number": null,
+    "title": "深圳行(二)",
+    "publish": true,
+    "confirmed_on": "2026-11-05",
+    "basis": "作者要求将深圳行系列收录到待分类"
+  },
+  "677eb477000000001800f7cc": {
+    "category": "待分类",
+    "number": null,
+    "title": "深圳行(三)",
+    "publish": true,
+    "confirmed_on": "2026-11-05",
+    "basis": "作者要求将深圳行系列收录到待分类"
+  },
+  "677eb563000000000800ef7f": {
+    "category": "待分类",
+    "number": null,
+    "title": "深圳行(四)",
+    "publish": true,
+    "confirmed_on": "2026-11-05",
+    "basis": "作者要求将深圳行系列收录到待分类"
+  },
+  "677f33d8000000002001a428": {
+    "category": "待分类",
+    "number": null,
+    "title": "深圳行(五)",
+    "publish": true,
+    "confirmed_on": "2026-11-05",
+    "basis": "作者要求将深圳行系列收录到待分类"
   }
 }
