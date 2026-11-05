@@ -707,7 +707,7 @@ export default sidebar({
       "link": "/posts/AI无相神功/063-69625920000000001a0312d1.html"
     },
     {
-      "text": "AI无相神功 #64",
+      "text": "AI无相神功 #64 运气与实力",
       "link": "/posts/AI无相神功/064-69704874000000000e03f746.html"
     },
     {
@@ -723,7 +723,7 @@ export default sidebar({
       "link": "/posts/AI无相神功/067-69707469000000001a01faa8.html"
     },
     {
-      "text": "AI无相神功 #68",
+      "text": "AI无相神功 #68 统计学的明珠不是假设检验，而是拟合",
       "link": "/posts/AI无相神功/068-69801e95000000000d00b7c8.html"
     },
     {
@@ -914,21 +914,121 @@ export default sidebar({
       "link": "/posts/待分类/在Cursor里用claude已经比购买claude还要好.html"
     },
     {
-      "text": "代码能写一辈子么",
+      "text": "SP6 代码能写一辈子么",
       "link": "/posts/待分类/代码能写一辈子么.html"
     },
     {
-      "text": "普通打工人的一生",
+      "text": "SP7 普通打工人的一生",
       "link": "/posts/待分类/普通打工人的一生.html"
     },
     {
-      "text": "职场的天花板",
+      "text": "SP8 职场的天花板",
       "link": "/posts/待分类/职场的天花板.html"
     }
   ]
 },
     { text: "量化百策", link: "/posts/量化百策/" },
-    { text: "其他文章", prefix: "posts/文章/", children: "structure" },
+    {
+  "text": "其他文章",
+  "children": [
+    {
+      "text": "#0 每年三个目标",
+      "link": "/posts/文章/0 每年的三个愿望.html"
+    },
+    {
+      "text": "#1 电和水的成本",
+      "link": "/posts/文章/1 电和水的成本.html"
+    },
+    {
+      "text": "#2 关于拖延的分析",
+      "link": "/posts/文章/2 关于拖延的分析.html"
+    },
+    {
+      "text": "#3 我所认识的左耳朵耗子",
+      "link": "/posts/文章/3 我所认识的左耳朵耗子.html"
+    },
+    {
+      "text": "#4 韩老魔的成长之路",
+      "link": "/posts/文章/4 韩老魔的成长之路.html"
+    },
+    {
+      "text": "#5 我所用的方法",
+      "link": "/posts/文章/5 我所用的方法.html"
+    },
+    {
+      "text": "#6 2023 夹缝中的奇迹",
+      "link": "/posts/文章/6 2023 夹缝中的奇迹.html"
+    },
+    {
+      "text": "#7 房间系统的内循环",
+      "link": "/posts/文章/7 房间系统的内循环.html"
+    },
+    {
+      "text": "#8 强与弱的幻觉",
+      "link": "/posts/文章/8 强与弱的幻觉.html"
+    },
+    {
+      "text": "#9 根据地",
+      "link": "/posts/文章/9 根据地.html"
+    },
+    {
+      "text": "#10 对标",
+      "link": "/posts/文章/10 对标.html"
+    },
+    {
+      "text": "#11 2024 明暗切换之路",
+      "link": "/posts/文章/11 2024 明暗切换之路.html"
+    },
+    {
+      "text": "#12 资源的极致使用",
+      "link": "/posts/文章/12 资源的极致使用.html"
+    },
+    {
+      "text": "#13 2025年中总结",
+      "link": "/posts/文章/15 2025年中总结.html"
+    },
+    {
+      "text": "#14 捡破烂的学问",
+      "link": "/posts/文章/14 捡破烂的上限.html"
+    },
+    {
+      "text": "#15 2025 花开时刻",
+      "link": "/posts/文章/13 2025 花开时刻.html"
+    },
+    {
+      "text": "#16 元宇宙",
+      "link": "/posts/文章/16 元宇宙.html"
+    },
+    {
+      "text": "#17 Skill vs Script 技能和自动化",
+      "link": "/posts/文章/17 Skill vs Script 技能和自动化.html"
+    },
+    {
+      "text": "#19 切一刀的隐喻",
+      "link": "/posts/文章/18 切一刀的隐喻.html"
+    },
+    {
+      "text": "#19 Scaling Law里面有当前科技无法理解的真意",
+      "link": "/posts/文章/19 Scaling Law里面有当前科技无法理解的真意.html"
+    },
+    {
+      "text": "#21 选择权",
+      "link": "/posts/文章/20 选择权.html"
+    },
+    {
+      "text": "#21 引擎层和编排层",
+      "link": "/posts/文章/21 引擎层和编排层.html"
+    },
+    {
+      "text": "#22 加一和乘1.1的分野",
+      "link": "/posts/文章/22 加一和乘1.1的分野.html"
+    },
+    {
+      "text": "#23 2026年中总结",
+      "link": "/posts/文章/23 2026年中总结.html"
+    }
+  ]
+},
     { text: "见解Tag", prefix: "posts/见解Tag/", children: "structure" },
     "intro",
   ],
