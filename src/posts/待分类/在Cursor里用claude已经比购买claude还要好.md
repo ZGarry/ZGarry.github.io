@@ -1,5 +1,5 @@
 ---
-title: "在Cursor里用claude已经比购买claude还要好"
+title: "SP5 在Cursor里用claude已经比购买claude还要好"
 category: ["待分类"]
 date: 2024-12-11T11:31:57+08:00
 xhs_note_id: "675907ad000000000700badf"
@@ -10,7 +10,7 @@ xhs_updated_at: "2024-12-11T11:31:57+08:00"
 lastUpdated: false
 ---
 
-# 在Cursor里用claude已经比购买claude还要好
+# SP5 在Cursor里用claude已经比购买claude还要好
 
  ![](/assets/xhs-legacy/7b4bd39b-eb0c-40c0-b4ad-14e33930a0d7.jpg)
 

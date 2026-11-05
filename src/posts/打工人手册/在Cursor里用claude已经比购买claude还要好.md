@@ -1,5 +1,5 @@
 ---
-title: "在Cursor里用claude已经比购买claude还要好"
+title: "SP5 在Cursor里用claude已经比购买claude还要好"
 article: false
 index: false
 sidebar: false

@@ -55,7 +55,7 @@ onUnmounted(() => observer?.disconnect());
       </section>
 
       <section class="series-section reveal" aria-labelledby="series-title">
-        <h2 id="series-title">两个系列，持续生长的思考。</h2>
+        <h2 id="series-title">两部完结系列，下一篇章。</h2>
         <div class="series-grid">
           <RouterLink to="/posts/打工人手册/" class="series-panel manual-panel">
             <div class="series-copy">
@@ -69,11 +69,12 @@ onUnmounted(() => observer?.disconnect());
             <div class="series-copy">
               <h3>AI无相神功</h3>
               <p>工具在变化，思考也在进化。<br />记录与 AI 共事的实践与判断。</p>
-              <span class="series-link">探索 94 篇文章 <span aria-hidden="true">↗</span></span>
+              <span class="series-link">阅读全 108 篇 · 已完结 <span aria-hidden="true">↗</span></span>
             </div>
             <span class="ai-letterform" aria-hidden="true">Ai</span>
           </RouterLink>
         </div>
+        <p><RouterLink to="/posts/量化百策/">下一个篇章：量化百策 ↗</RouterLink></p>
       </section>
 
       <section class="reading-section reveal" aria-labelledby="reading-title">

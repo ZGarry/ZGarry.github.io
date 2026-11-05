@@ -623,6 +623,10 @@ export default sidebar({
       "link": "/posts/AI无相神功/041-68ea063b0000000005030332.html"
     },
     {
+      "text": "AI无相神功 #42 复杂数据系统一定要先构建基线",
+      "link": "/posts/AI无相神功/042-68edcb380000000004014822.html"
+    },
+    {
       "text": "AI无相神功 #44 局部最优",
       "link": "/posts/AI无相神功/044-68f843ef0000000007037752.html"
     },
@@ -829,6 +833,58 @@ export default sidebar({
     {
       "text": "AI无相神功 #96 不成比例的精力消耗",
       "link": "/posts/AI无相神功/096-69e6c4a10000000023005283.html"
+    },
+    {
+      "text": "AI无相神功 #96.5 策略思考：近因效应",
+      "link": "/posts/AI无相神功/096-69eeb220000000002202a800.html"
+    },
+    {
+      "text": "AI无相神功 #97 平台的成本，就是你的套利空间",
+      "link": "/posts/AI无相神功/097-6a06eb2e0000000036018fa7.html"
+    },
+    {
+      "text": "AI无相神功 #98 AI和巨物",
+      "link": "/posts/AI无相神功/098-6a1e281300000000060372e9.html"
+    },
+    {
+      "text": "AI无相神功 #99 AI和管理城市",
+      "link": "/posts/AI无相神功/099-6a222bb20000000008000879.html"
+    },
+    {
+      "text": "AI无相神功 #100 设置目标而非告知行为",
+      "link": "/posts/AI无相神功/100-6a2a4f10000000001c02546a.html"
+    },
+    {
+      "text": "AI无相神功 #101 编写循环而非告知行动手册",
+      "link": "/posts/AI无相神功/101-6a39e7320000000008025796.html"
+    },
+    {
+      "text": "AI无相神功 #102 CEO和战略",
+      "link": "/posts/AI无相神功/102-6a39e7650000000022008b5f.html"
+    },
+    {
+      "text": "AI无相神功 #103 你的Loop可能只是在让AI白白加班",
+      "link": "/posts/AI无相神功/103-6a445eae00000000210164ca.html"
+    },
+    {
+      "text": "AI无相神功 #104 真正的欺骗从数据开始",
+      "link": "/posts/AI无相神功/104-6a57019c00000000060350b6.html"
+    },
+    {
+      "text": "AI无相神功 #105 benchmark很重要",
+      "link": "/posts/AI无相神功/105-6a60316f000000001002b8d3.html"
+    },
+    {
+      "text": "AI无相神功 #106 improve只来自于两件事",
+      "link": "/posts/AI无相神功/106-6aa35024000000002901870b.html"
+    },
+    {
+      "text": "AI无相神功 #107 大师熬过负反馈",
+      "link": "/posts/AI无相神功/107-68997fe1000000002301bf80.html"
+    },
+    {
+      "text": "AI无相神功 #108 Fable告诉我计算的本质",
+      "link": "/posts/AI无相神功/108-6aa89704000000000b00ea67.html"
     }
   ]
 },
@@ -854,12 +910,12 @@ export default sidebar({
       "link": "/posts/待分类/SP4 华灯初上.html"
     },
     {
-      "text": "代码能写一辈子么",
-      "link": "/posts/待分类/代码能写一辈子么.html"
+      "text": "SP5 在Cursor里用claude已经比购买claude还要好",
+      "link": "/posts/待分类/在Cursor里用claude已经比购买claude还要好.html"
     },
     {
-      "text": "在Cursor里用claude已经比购买claude还要好",
-      "link": "/posts/待分类/在Cursor里用claude已经比购买claude还要好.html"
+      "text": "代码能写一辈子么",
+      "link": "/posts/待分类/代码能写一辈子么.html"
     },
     {
       "text": "普通打工人的一生",
@@ -871,6 +927,7 @@ export default sidebar({
     }
   ]
 },
+    { text: "量化百策", link: "/posts/量化百策/" },
     { text: "其他文章", prefix: "posts/文章/", children: "structure" },
     { text: "见解Tag", prefix: "posts/见解Tag/", children: "structure" },
     "intro",
