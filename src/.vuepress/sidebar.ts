@@ -626,6 +626,14 @@ export default sidebar({
       "text": "AI无相神功 #42 复杂数据系统一定要先构建基线",
       "link": "/posts/AI无相神功/042-68edcb380000000004014822.html"
     },
+{
+  "text": "AI无相神功 #42.5 可能性之书，笛卡尔积",
+  "link": "/posts/AI无相神功/042-68f4846b00000000050114f8.html"
+},
+{
+  "text": "AI无相神功 #43 文生图最佳实践",
+  "link": "/posts/AI无相神功/043-6823ff5f0000000022004b78.html"
+},
     {
       "text": "AI无相神功 #44 局部最优",
       "link": "/posts/AI无相神功/044-68f843ef0000000007037752.html"
@@ -738,6 +746,10 @@ export default sidebar({
       "text": "AI无相神功 #71 一切皆周期",
       "link": "/posts/AI无相神功/071-6981e8c7000000000e03f64d.html"
     },
+{
+  "text": "AI无相神功 #72 从茹毛饮血到刀耕火种",
+  "link": "/posts/AI无相神功/072-689c01ab000000001b0312d1.html"
+},
     {
       "text": "AI无相神功 #73 无策略者的自以为是",
       "link": "/posts/AI无相神功/073-6981e98e000000001a021e19.html"

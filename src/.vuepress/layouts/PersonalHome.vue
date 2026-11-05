@@ -69,7 +69,7 @@ onUnmounted(() => observer?.disconnect());
             <div class="series-copy">
               <h3>AI无相神功</h3>
               <p>工具在变化，思考也在进化。<br />记录与 AI 共事的实践与判断。</p>
-              <span class="series-link">阅读全 108 篇 · 已完结 <span aria-hidden="true">↗</span></span>
+              <span class="series-link">阅读全 111 篇 · 已完结 <span aria-hidden="true">↗</span></span>
             </div>
             <span class="ai-letterform" aria-hidden="true">Ai</span>
           </RouterLink>
